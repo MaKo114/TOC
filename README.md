@@ -7,29 +7,29 @@ web crawler
 back-end
 
 ติดตั้งครั้งแรก วิธี RUN back-end
-1. เข้า C:\Users\Path\Documents\GitHub\Theory-Of-Computation
+1. เข้า C:\Users\Path\Documents\GitHub\TOC
 2. python -m venv myenv
 3. myenv\Scripts\activate
-4. เข้า C:\Users\Path\Documents\GitHub\Theory-Of-Computation\fastapi-backend
+4. เข้า C:\Users\Path\Documents\GitHub\TOC\client
 5. pip install fastapi uvicorn
 6. uvicorn main:app --reload
 
 มี Project อยู่แล้ว
-1. เข้า C:\Users\Path\Documents\GitHub\Theory-Of-Computation
+1. เข้า C:\Users\Path\Documents\GitHub\TOC
 2. myenv\Scripts\activate
-3. เข้า C:\Users\Path\Documents\GitHub\Theory-Of-Computation\fastapi-backend
+3. เข้า C:\Users\Path\Documents\GitHub\TOC\client
 4. uvicorn main:app --reload
 
 ---------------------------------------------------------------------------
 front-end
 
 ติดตั้งครั้งแรก วิธี RUN front-end
-1. เข้า C:\Users\Path\Documents\GitHub\Theory-Of-Computation\frontend
+1. เข้า C:\Users\Path\Documents\GitHub\TOC\frontend
 2. npm install
 3. C:\Users\Path\Documents\GitHub\Theory-Of-Computation\frontend
 4. npm start
 
 มี Project อยู่แล้ว
-1. เข้า C:\Users\Path\Documents\GitHub\Theory-Of-Computation\frontend
-2. C:\Users\Path\Documents\GitHub\Theory-Of-Computation\frontend
+1. เข้า C:\Users\Path\Documents\GitHub\TOC\frontend
+2. C:\Users\Path\Documents\GitHub\TOC\frontend
 3. npm start
