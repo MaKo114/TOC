@@ -1,0 +1,80 @@
+# ────────────── Python / FastAPI ──────────────
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+env/
+venv/
+ENV/
+*.env
+
+# Python egg metadata
+*.egg-info/
+*.egg
+
+# Pip cache
+pip-wheel-metadata/
+*.whl
+
+# Logs
+*.log
+
+# Coverage reports
+htmlcov/
+.coverage
+coverage.xml
+*.cover
+.cache
+
+# Build artifacts
+build/
+dist/
+*.spec
+
+# IDE/editor configs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# macOS & Windows
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ────────────── Vite / React ──────────────
+# Node modules
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Vite cache
+.vite/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# npm/yarn/pnpm logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# IDE/editor configs (frontend)
+*.swp
+*.bak
+*.tmp
+
+# Optional: OS-specific
+*.DS_Store
+*.Thumbs.db
+
+# ────────────── Optional: Docker ──────────────
+docker-compose.override.yml
