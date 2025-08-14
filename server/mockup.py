@@ -1,151 +1,73 @@
-import aiohttp
-from bs4 import BeautifulSoup
+import requests
 import re
-import random
-import csv
-from datetime import datetime, timedelta
 
-cache_expiration = timedelta(minutes=5)
-cache_data = None
-cache_timestamp = None
+base_url = "https://liquipedia.net"
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
+}
 
-########## SCAP WEB ##########
+def all_data():
+    try:
+        # --- ระดับ 1 ---
+        print("[ระดับ 1] เข้าหน้า Liquipedia")
+        r1 = requests.get(base_url, headers=headers)
+        r1.raise_for_status()
 
-async def fetch_real_time_data():
-    global cache_data, cache_timestamp
-    
-    if cache_data and cache_timestamp and datetime.now() - cache_timestamp < cache_expiration:
-        return cache_data
-    
-    async with aiohttp.ClientSession() as session:
-        async with session.get('https://th.wikipedia.org/wiki/รายชื่อภาพยนต์ไทย') as response:
-           
+        valorant_link = re.search(r'href="(/valorant(?:/[^"]*)?)"', r1.text, re.IGNORECASE)
+        if not valorant_link:
+            raise Exception("ไม่พบลิงก์ /valorant")
 
-            return response
-
-# async def artist_song_image():
-#     h3_list, span_list, img_to_append = await fetch_real_time_data()
-    
-#     x = []
-#     for i in range(len(h3_list)):
-#         x.append({'Artist' : span_list[i].string.strip(),
-#                 'Song' : h3_list[i].string.strip(),
-#                 'Image' : img_to_append[i]})
-
-#     return x
-
-# ########## MANAGE DATA ##########
-
-# async def All_Songs():
-#     data = await artist_song_image()
-#     allSong = []
-#     song_id = 1
-
-#     for rank, song in enumerate(data, start=1):
-#         song_info = {
-#             'id': song_id,
-#             'artist': song['Artist'],
-#             'song': song['Song'],
-#             'img': song['Image'],
-#             'rank': str(rank)
-#         }
+        valorant_url = base_url + valorant_link.group(1)
+        print("เช็คลิงก์ VALORANT:", valorant_url)
         
-#         allSong.append(song_info)
-#         song_id += 1
 
-#     return allSong
+        # --- ระดับ 2 ---
+        print("[ระดับ 2] เข้าหน้า VALORANT")
+        r2 = requests.get(valorant_url, headers=headers)
+        r2.raise_for_status()
 
-# async def All_Artist():
-#     allSong = await All_Songs()
-#     artist_data = {}
-    
-#     artist_id = 1
-#     for song in allSong:
-#         artist_name = song['artist']
-#         if artist_name not in artist_data:
-#             artist_data[artist_name] = {
-#                 'artistID': artist_id,
-#                 'artistName': artist_name,
-#                 'artistImg' : '',
-#                 'artistSong': []
-#             }
-#             artist_id += 1
+        portal_teams_link = re.search(r'href="(/valorant/Portal:Teams)"', r2.text, re.IGNORECASE)
+        if not portal_teams_link:
+            raise Exception("ไม่พบลิงก์ Portal:Teams")
+
+        portal_teams_url = base_url + portal_teams_link.group(1)
+        print("เช็คลิงก์ Portal:Teams:", portal_teams_url)
+
+        # --- ระดับ 3 ---
+        print("[ระดับ 3] เข้าหน้า Portal:Teams")
+        r3 = requests.get(portal_teams_url, headers=headers)
+        r3.raise_for_status()
+
+        team_pattern = r'<a href="(/valorant/[^"]+)" title="([^"]+)">'
+        teams = re.findall(team_pattern, r3.text)
+
+        # กรอง Portal, Category และลบซ้ำ
+        seen = set()
+        unique_teams = []
+        for link, name in teams:
+            if not any(x in link for x in ["Portal", "Category"]):
+                if (link, name) not in seen:
+                    seen.add((link, name))
+                    unique_teams.append((link, name))
+
+        print(f"\n[ผลลัพธ์] พบทีม {len(unique_teams)} ทีม (ไม่มีซ้ำ):")
+        all_items = []
+        for link, name in unique_teams[:200]:  # แสดง 20 ทีมแรก
+            # print(f"  - {name} ({base_url}{link})")
+            all_items.append({name:base_url+link})
+        return all_items
+
+    except Exception as e:
+        print("เกิดข้อผิดพลาด:", e)
         
-#         artist_data[artist_name]['artistSong'].append({
-#             'id': song['id'],
-#             'song': song['song'],
-#             'img': song['img'],
-#             'rank': song['rank']
-#         })
-
-#     for artist_name, artist_info in artist_data.items():
-#         artist_songs = artist_info['artistSong']
-#         random_song = random.choice(artist_songs)
-#         artist_info['artistImg'] = random_song['img']
-
-#     artist_data = sorted(artist_data.values(), key=lambda x: x['artistName'])
-
-#     return artist_data
-
-# async def search_songs_by_artist(artist_name):
-#     allSong = await All_Songs()
+        
+def get_data_by_name(name):
+    team = all_data()
+    for k in team:
+        if list(k.keys())[0] == name :
+            return list(k.values())[0]
+            
     
-#     artist_songs = {
-#         'artistID': None,
-#         'artistName': artist_name,
-#         'artistSong': []
-#     }
-
-#     artist_id = 1
-#     artist_found = False
-#     for song in allSong:
-#         if '-' in artist_name:
-#             artist_name = artist_name.replace('-', '/')
-
-#         if song['artist'] == artist_name:
-#             if not artist_found:
-#                 artist_songs['artistID'] = artist_id
-#                 artist_found = True
-#             artist_songs['artistSong'].append({
-#                 'id': song['id'],
-#                 'song': song['song'],
-#                 'img': song['img'],
-#                 'rank': song['rank']
-#             })
-#             artist_id += 1
-
-#     return artist_songs
-
-# async def search_songs_by_keyword(keyword):
-#     data = await All_Songs()
-
-#     search_results = []
-#     for song_info in data:
-#         if keyword.lower() in song_info['artist'].lower() or keyword.lower() in song_info['song'].lower():
-#             search_results.append(song_info)
-
-#     if not search_results:
-#         return "Not Found"
     
-#     return search_results
 
-# async def export_to_csv(filename):
-#     data = await All_Songs()
-
-#     fieldnames = ['Rank', 'SongName', 'ArtistName', 'SongImg']
-
-#     with open(filename, mode='w', newline='', encoding='utf-8') as file:
-#         writer = csv.DictWriter(file, fieldnames=fieldnames)
-#         writer.writeheader()
-
-#         for song in data:
-#             writer.writerow({
-#                 'Rank': song['rank'],
-#                 'SongName': song['song'],
-#                 'ArtistName': song['artist'],
-#                 'SongImg': song['img'],
-#             })
-
-
-data =  fetch_real_time_data()
-print(data)
+# print(get_data_by_name('Fnatic'))
