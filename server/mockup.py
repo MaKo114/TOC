@@ -1,73 +1,103 @@
-import requests
 import re
+import requests
 
-base_url = "https://liquipedia.net"
-headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
-}
+def get_europe_team_info(base_url='https://www.vlr.gg'):
+    # ดึงหน้าแรก
+    html = requests.get(base_url).text
 
-def all_data():
-    try:
-        # --- ระดับ 1 ---
-        print("[ระดับ 1] เข้าหน้า Liquipedia")
-        r1 = requests.get(base_url, headers=headers)
-        r1.raise_for_status()
+    # หา path ของหน้า rankings
+    match = re.search(r'href="(/rankings(?:/[^"]*)?)"', html, re.IGNORECASE)
+    if not match:
+        raise ValueError("ไม่พบ path ของหน้า rankings")
+    rankings_url = base_url + match.group(1)
 
-        valorant_link = re.search(r'href="(/valorant(?:/[^"]*)?)"', r1.text, re.IGNORECASE)
-        if not valorant_link:
-            raise Exception("ไม่พบลิงก์ /valorant")
+    # ดึงหน้า rankings หลัก
+    html_main = requests.get(rankings_url).text
 
-        valorant_url = base_url + valorant_link.group(1)
-        print("เช็คลิงก์ VALORANT:", valorant_url)
+    # หา path ของลีคทั้งหมด
+    league_pattern = r'<a href="(/rankings/[a-z\-]+)"'
+    league_paths = list(set(re.findall(league_pattern, html_main, re.IGNORECASE)))
+
+    # กรองเฉพาะลีคที่เกี่ยวกับยุโรป
+    # europe_leagues = [path for path in league_paths if path == '/rankings/europe']
+    europe_leagues = [path for path in league_paths if any(k in path.lower() for k in ['europe', 'emea', 'eu'])]
+
+    # pattern สำหรับชื่อทีม, ลิงก์ และโลโก้
+    # team_pattern = r'<a href="(/team/\d+/[^"]+)"[^>]*>.*?<img[^>]+src="([^"]+)"[^>]*>.*?<div[^>]*class="ge-text">([^<]+)</div>'
+    team_pattern = r'<a href="(/team/\d+/[^"]+)"[^>]*>[\s\S]*?<img[^>]+src="([^"]+)"[^>]*>[\s\S]*?<div[^>]*class="ge-text">([\s\S]*?)</div>'
+
+    team_data = []
+    for path in europe_leagues:
+        url = base_url + path
+        html = requests.get(url).text
+        teams = re.findall(team_pattern, html, re.DOTALL | re.IGNORECASE)
+        print(f"✅ Found {len(teams)} teams in {path}")
         
 
-        # --- ระดับ 2 ---
-        print("[ระดับ 2] เข้าหน้า VALORANT")
-        r2 = requests.get(valorant_url, headers=headers)
-        r2.raise_for_status()
 
-        portal_teams_link = re.search(r'href="(/valorant/Portal:Teams)"', r2.text, re.IGNORECASE)
-        if not portal_teams_link:
-            raise Exception("ไม่พบลิงก์ Portal:Teams")
-
-        portal_teams_url = base_url + portal_teams_link.group(1)
-        print("เช็คลิงก์ Portal:Teams:", portal_teams_url)
-
-        # --- ระดับ 3 ---
-        print("[ระดับ 3] เข้าหน้า Portal:Teams")
-        r3 = requests.get(portal_teams_url, headers=headers)
-        r3.raise_for_status()
-
-        team_pattern = r'<a href="(/valorant/[^"]+)" title="([^"]+)">'
-        teams = re.findall(team_pattern, r3.text)
-
-        # กรอง Portal, Category และลบซ้ำ
-        seen = set()
-        unique_teams = []
-        for link, name in teams:
-            if not any(x in link for x in ["Portal", "Category"]):
-                if (link, name) not in seen:
-                    seen.add((link, name))
-                    unique_teams.append((link, name))
-
-        print(f"\n[ผลลัพธ์] พบทีม {len(unique_teams)} ทีม (ไม่มีซ้ำ):")
-        all_items = []
-        for link, name in unique_teams[:200]:  # แสดง 20 ทีมแรก
-            # print(f"  - {name} ({base_url}{link})")
-            all_items.append({name:base_url+link})
-        return all_items
-
-    except Exception as e:
-        print("เกิดข้อผิดพลาด:", e)
-        
-        
-def get_data_by_name(name):
-    team = all_data()
-    for k in team:
-        if list(k.keys())[0] == name :
-            return list(k.values())[0]
+        for href, logo_src, name in teams:
+            clean_name = re.sub(r'<[^>]+>', '', name)
+            clean_name = re.sub(r'\s+', ' ', clean_name).strip()
+            clean_name = re.sub(r'\s+#\w+\s+[A-Za-z]+$', '', clean_name)
             
-    
+
+            team_data.append({
+                "name": clean_name,
+                "url": base_url + href,
+                "logo": base_url + logo_src,
+                "league": path
+            })
+
+    return team_data
+
+
+
+def get_team_players(team):
+    data = get_europe_team_info()
+    for i in data:
+        if i['name'].lower() == team.lower():
+            html = requests.get(i['url']).text
+
+            # จับ div ที่มี class team-roster-item-name-alias แล้วดึง text หลัง <i>
+            pattern = r'<div class="team-roster-item-name-alias">\s*<i[^>]*></i>\s*([^<]+)</div>'
+            players = re.findall(pattern, html, re.IGNORECASE)
+
+            return [p.strip() for p in players]
+
+
+# players = get_team_players('fnatic')
+# print(players)
+
+# teams = get_europe_team_info()
+# for team in teams:
+#     print(team)
+
     
 
-# print(get_data_by_name('Fnatic'))
+# import re
+# import requests
+
+
+# base_url = 'https://www.vlr.gg'
+
+# html = requests.get(base_url)
+
+# pattent = re.search(r'href="(/rankings(?:/[^"]*)?)"', html.text, re.IGNORECASE)
+# link_level2 = base_url + pattent.group(1)
+
+
+# html_lv2 = requests.get(link_level2)
+
+
+# pt = r'<a href="/team/\d+/[a-z0-9\-]+" class="">'
+# match = re.findall(pt, html_lv2.text, re.IGNORECASE)
+
+
+# v= 1
+# for i in match:
+
+#     print(v, i)
+#     v+=1
+    
+    
+    

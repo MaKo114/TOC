@@ -9,7 +9,7 @@ back-end
 ติดตั้งครั้งแรก วิธี RUN back-end
 1. เข้า C:\Users\Path\Documents\GitHub\TOC
 2. python -m venv myenv
-3. myenv\Scripts\activate
+3. myenv\Scripts\activate  // for me => .venv\Scripts\activate.bat
 4. เข้า C:\Users\Path\Documents\GitHub\TOC\client
 5. pip install fastapi uvicorn
 6. uvicorn main:app --reload

@@ -1,17 +1,15 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from mockup import *
 
 app = FastAPI()
 
-
-@app.get("/")
-def get_data():
-    data = all_data()
+@app.get("/teams")
+def fetch_all_data():
+    data =  get_europe_team_info()
     return data
 
 
-@app.get("/user/{name}")  
-def get_user_by_id(name: str):
-    team = get_data_by_name(name)
-    print(team)
-    return {'link':team}
+@app.get('/team/players/{team}')
+def fetch_players(team : str):
+    players = get_team_players(team)
+    return players
