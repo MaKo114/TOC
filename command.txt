@@ -1,0 +1,12 @@
+git branch
+git checkout -b feature/ชื่อฟีเจอร์
+
+บันทึกการเปลี่ยนแปลง
+git add .
+git commit -m "เพิ่มฟีเจอร์ค้นหาเพลง"
+
+push branch ไป github
+git push origin feature/search-api
+
+สร้าง branch  แล้วสลับไปเลย
+git switch -c feature/new-api
