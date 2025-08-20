@@ -130,9 +130,11 @@ def extract_match_cards(link, limit=5):
     html = requests.get(link)
     cards = re.findall(r'<a href="(/[^"]+)"[^>]*class="wf-card[^"]*">([\s\S]*?)</a>', html.text)
     results = []
+
     for url, block in cards[:limit]:
         event = re.search(r'<div[^>]*font-weight:\s*700[^>]*class="text-of">\s*(.*?)\s*</div>', block)
-        stage = re.search(r'Group Stage\s*⋅\s*(W\d+)', block, re.DOTALL)
+        match = re.search(r'Group Stage\s*(?:⋅|&sdot;)\s*(W\d+)', block, re.DOTALL)
+
         team_names = re.findall(r'<span[^>]*class="m-item-team-name"[^>]*>\s*(.*?)\s*</span>', block)
         team_1 = team_names[0].strip() if len(team_names) > 0 else None
         team_2 = team_names[1].strip() if len(team_names) > 1 else None
@@ -141,32 +143,58 @@ def extract_match_cards(link, limit=5):
         logo_2 = re.search(r'<div class="m-item-logo mod-right">[\s\S]*?<img src="(//[^"]+)"', block)
         date = re.search(r'<div class="m-item-date">[\s\S]*?<div>\s*(.*?)\s*</div>\s*(.*?)\s*</div>', block)
 
-    results.append({
-        "match_url": "https://www.vlr.gg" + url,
-        "event": event.group(1).strip() if event else None,
-        "stage": stage.group(1).strip() if stage else None,
-        "team_1": team_1,
-        "team_2": team_2,
-        "score": f"{score.group(1)} : {score.group(2)}" if score else None,
-        "team_1_logo": "https:" + logo_1.group(1) if logo_1 else None,
-        "team_2_logo": "https:" + logo_2.group(1) if logo_2 else None,
-        "date": date.group(1).strip() if date else None,
-        "time": date.group(2).strip() if date else None
-    })
+        results.append({
+            "match_url": "https://www.vlr.gg" + url,
+            "event": event.group(1).strip() if event else None,
+            "stage": match.group(1) if match else None,
+            "team_1": team_1,
+            "team_2": team_2,
+            "score": f"{score.group(1)} : {score.group(2)}" if score else None,
+            "team_1_logo": "https:" + logo_1.group(1) if logo_1 else None,
+            "team_2_logo": "https:" + logo_2.group(1) if logo_2 else None,
+            "date": date.group(1).strip() if date else None,
+            "time": date.group(2).strip() if date else None
+        })
+
     return results
+
+# def extract_match_cards(link, limit=5):
+#     html = requests.get(link)
+#     cards = re.findall(r'<a href="(/[^"]+)"[^>]*class="wf-card[^"]*">([\s\S]*?)</a>', html.text)
+#     results = []
+#     for url, block in cards[:limit]:
+#         event = re.search(r'<div[^>]*font-weight:\s*700[^>]*class="text-of">\s*(.*?)\s*</div>', block)
+#         match = re.search(r'Group Stage\s*(?:⋅|&sdot;)\s*(W\d+)', block, re.DOTALL)
+
+#         team_names = re.findall(r'<span[^>]*class="m-item-team-name"[^>]*>\s*(.*?)\s*</span>', block)
+#         team_1 = team_names[0].strip() if len(team_names) > 0 else None
+#         team_2 = team_names[1].strip() if len(team_names) > 1 else None
+#         score = re.search(r'<div class="m-item-result[^>]*">[\s\S]*?<span>(\d+)</span>[\s\S]*?<span>(\d+)</span>', block)
+#         logo_1 = re.search(r'<div class="m-item-logo">[\s\S]*?<img src="(//[^"]+)"', block)
+#         logo_2 = re.search(r'<div class="m-item-logo mod-right">[\s\S]*?<img src="(//[^"]+)"', block)
+#         date = re.search(r'<div class="m-item-date">[\s\S]*?<div>\s*(.*?)\s*</div>\s*(.*?)\s*</div>', block)
+
+#     results.append({
+#         "match_url": "https://www.vlr.gg" + url,
+#         "event": event.group(1).strip() if event else None,
+#         "stage": match.group(1) if match else None,
+#         "team_1": team_1,
+#         "team_2": team_2,
+#         "score": f"{score.group(1)} : {score.group(2)}" if score else None,
+#         "team_1_logo": "https:" + logo_1.group(1) if logo_1 else None,
+#         "team_2_logo": "https:" + logo_2.group(1) if logo_2 else None,
+#         "date": date.group(1).strip() if date else None,
+#         "time": date.group(2).strip() if date else None
+#     })
+    
+    
+#     return results
   
-print(extract_match_cards('https://www.vlr.gg/player/438/boaster'))
+lst = extract_match_cards('https://www.vlr.gg/player/438/boaster')
+
+for  i in lst:
+    print(i)
 # print(player_detail('fnatic', 'Boaster'))
-
-
-
-
-
-
-
-
-
-
 
 
 
