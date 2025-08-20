@@ -78,19 +78,85 @@ def get_team_players(team):
 def player_detail(team, name):
     base_url = 'https://www.vlr.gg'
     members = get_team_players(team)
-    links_list = []
-    if members :
+    if members:
         for data in members:
             if name == data[1]:
-                link = base_url + data[0] # data[0] คือ path ของ player คนนั้น เช่น /player/438/boaster
-                links_list.append(link)
+                link = base_url + data[0]
+                html = requests.get(link)
+                header_block = re.search(r'<div class="player-header">([\s\S]*?)</div>', html.text)
+                if not header_block:
+                    return 'ไม่พบ player-header'
+
+                alias_match = re.search(r'<h1[^>]*class="[^"]*wf-title[^"]*"[^>]*>([\s\S]*?)</h1>', html.text)
+                alias = alias_match.group(1).strip() if alias_match else None
+
+                real_match = re.search(r'<h2[^>]*class="player-real-name ge-text-light"[^>]*>(.*?)</h2>', html.text)
+                real_name = real_match.group(1).strip() if real_match else None
+
+
+                social_links = re.findall(r'<a[^>]+href="(https?://[^"]+)"', html.text)
+                exclude_domains = [
+                    'twitter.com/vlrdotgg',
+                    'discord.com/invite/VLR'
+                ]
+
+                filtered_social = [
+                    url for url in social_links
+                    if not any(ex in url for ex in exclude_domains)
+                ]
+
+                country_match = re.search(r'<div[^>]*class="ge-text-light"[^>]*>[\s\S]*?<i[^>]*class="flag[^"]*"[^>]*></i>\s*([\w\s\-]+)</div>',html.text)
+                country_name = country_match.group(1).strip() if country_match else None
                 
+                code_match = re.search(r'<i[^>]*class="flag mod-([a-z]{2})"', html.text)
+                country_code = code_match.group(1).upper() if code_match else None
+
                 
-        return links_list
+                img_match = re.search(r'<div[^>]*class="wf-avatar mod-player"[^>]*>[\s\S]*?<img[^>]+src="([^"]+)"', html.text)
+                img_url = 'https:' + img_match.group(1) if img_match else None
+
+                return {
+                            "alias": alias,
+                            "real_name": real_name,
+                            "image": img_url,
+                            "social": filtered_social,
+                            "country": {'name': country_name,'code': country_code
+                            }
+                        }
+
     return 'not found'
+
+def extract_match_cards(link, limit=5):
+    html = requests.get(link)
+    cards = re.findall(r'<a href="(/[^"]+)"[^>]*class="wf-card[^"]*">([\s\S]*?)</a>', html.text)
+    results = []
+    for url, block in cards[:limit]:
+        event = re.search(r'<div[^>]*font-weight:\s*700[^>]*class="text-of">\s*(.*?)\s*</div>', block)
+        stage = re.search(r'Group Stage\s*⋅\s*(W\d+)', block, re.DOTALL)
+        team_names = re.findall(r'<span[^>]*class="m-item-team-name"[^>]*>\s*(.*?)\s*</span>', block)
+        team_1 = team_names[0].strip() if len(team_names) > 0 else None
+        team_2 = team_names[1].strip() if len(team_names) > 1 else None
+        score = re.search(r'<div class="m-item-result[^>]*">[\s\S]*?<span>(\d+)</span>[\s\S]*?<span>(\d+)</span>', block)
+        logo_1 = re.search(r'<div class="m-item-logo">[\s\S]*?<img src="(//[^"]+)"', block)
+        logo_2 = re.search(r'<div class="m-item-logo mod-right">[\s\S]*?<img src="(//[^"]+)"', block)
+        date = re.search(r'<div class="m-item-date">[\s\S]*?<div>\s*(.*?)\s*</div>\s*(.*?)\s*</div>', block)
+
+    results.append({
+        "match_url": "https://www.vlr.gg" + url,
+        "event": event.group(1).strip() if event else None,
+        "stage": stage.group(1).strip() if stage else None,
+        "team_1": team_1,
+        "team_2": team_2,
+        "score": f"{score.group(1)} : {score.group(2)}" if score else None,
+        "team_1_logo": "https:" + logo_1.group(1) if logo_1 else None,
+        "team_2_logo": "https:" + logo_2.group(1) if logo_2 else None,
+        "date": date.group(1).strip() if date else None,
+        "time": date.group(2).strip() if date else None
+    })
+    return results
   
-# print(get_team_players('fnatic'))
-print(player_detail('fnatic', 'Boaster'))
+print(extract_match_cards('https://www.vlr.gg/player/438/boaster'))
+# print(player_detail('fnatic', 'Boaster'))
 
 
 
