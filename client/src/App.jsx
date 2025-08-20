@@ -1,11 +1,14 @@
 import React from 'react'
-import Totom from './components/Totom'
-import './index.css'
-
+import Nav from './component/Nav'
+import Content from './component/Content'
 
 const App = () => {
   return (
     <div>
+      <div className='text-red-400 font-bold'>
+        <Nav></Nav>
+        <Content></Content>
+      </div>
     </div>
   )
 }
