@@ -13,3 +13,4 @@ def fetch_all_data():
 def fetch_players(team : str):
     players = get_team_players(team)
     return players
+
