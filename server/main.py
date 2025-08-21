@@ -45,9 +45,3 @@ def player_info(team: str, name: str):
         return JSONResponse(status_code=500, content={"error": str(e)})
 
 
-
-@app.get("/csv", response_class=FileResponse)
-def download_csv():
-    filename = "full_team_data.csv"
-
-    try:

@@ -122,7 +122,7 @@ function Content() {
                       className="h-20 w-20 object-cover rounded-full border-2 border-white"
                       alt={profile.alias}
                     />
-                    <div className="px-4">
+                    <div className="px-4 w-full max-w-[180px] overflow-hidden text-ellipsis whitespace-nowrap">
                       <div className="text-lg font-semibold text-black">
                         {profile.alias}
                       </div>
@@ -159,7 +159,7 @@ function Content() {
                 </div>
               ))
             : team
-                .filter((profile) => profile.type === "player")
+                .filter((profile) => profile.type === "staff")
                 .map((profile, index) => (
                   <a
                     key={index}
