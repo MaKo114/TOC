@@ -1,7 +1,7 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
+import os
 from mockup import *
 
 app = FastAPI()
@@ -45,7 +45,9 @@ def player_info(team: str, name: str):
         return JSONResponse(status_code=500, content={"error": str(e)})
 
 
-@app.get('/csv')
+
+@app.get("/csv", response_class=FileResponse)
 def download_csv():
+    filename = "full_team_data.csv"
+
     try:
-      

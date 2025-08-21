@@ -46,6 +46,7 @@ def get_europe_team_info(base_url='https://www.vlr.gg'):
 # def get_team_players(team):
 def get_team_players(team):
     data = get_europe_team_info()
+    print(data)
     
     def classify_type(roles):
         staff_roles = {"manager", "head coach", "assistant coach", "performance coach"}
@@ -71,7 +72,7 @@ def get_team_players(team):
                 alias = re.sub(r'<[^>]+>', '', alias_match.group(1)).strip() if alias_match else None
                 real_name = re.sub(r'<[^>]+>', '', realname_match.group(1)).strip() if realname_match else None
                 roles = [re.sub(r'<[^>]+>', '', r).strip() for r in role_matches]
-                image = "https:" + img_match.group(1) if img_match else None
+                image = "https:" + img_match.group(1) if img_match else 'https://vlr.gg/img/base/ph/sil.png'
                 flag = flag_match.group(1).upper() if flag_match else None
                 path = href_match.group(1) if href_match else None
                 type_ = classify_type(roles)
@@ -232,42 +233,6 @@ def extract_all_team_info(team, name):
     }
 
 
-
-def export_all_team_data_to_csv(filename="full_team_data.csv"):
-    base_url = "https://www.vlr.gg"
-    teams = get_europe_team_info(base_url)
-    all_rows = []
-
-    for team in teams:
-        team_name = team["name"]
-        try:
-            players = get_team_players(team_name)
-            for player in players:
-                detail = player_detail(team_name, player["alias"])
-                matches = extract_match_cards(team_name, player["alias"], limit=3)
-                history = extract_all_team_info(team_name, player["alias"])
-
-                all_rows.append({
-                    "team": team_name,
-                    "alias": player["alias"],
-                    "real_name": player["real_name"],
-                    "roles": ", ".join(player["roles"]),
-                    "type": player["type"],
-                    "flag": player["flag"],
-                    "player_image": player["image"],
-                    "player_path": player["path"],
-                    "social_links": ", ".join(detail.get("social", [])),
-                    "country_name": detail.get("country", {}).get("name"),
-                    "country_code": detail.get("country", {}).get("code"),
-                    "current_team": history.get("current_team", {}).get("name"),
-                    "joined": history.get("current_team", {}).get("joined"),
-                    "past_teams": ", ".join([t["name"] for t in history.get("past_teams", [])]),
-                    "recent_matches": ", ".join([m["event"] for m in matches if m.get("event")])
-                })
-        except Exception as e:
-            print(f"Error processing team {team_name}: {e}")
-
-    # Export to CSV
-    fieldnames = list(all_rows[0].keys())
+def export_team_names_to_csv(filename="team_names.csv"):
+    team_names = get_europe_team_info()
     with open(filename, mode="w", newline="", encoding="utf-8") as file:
-       
