@@ -141,18 +141,19 @@ def extract_match_cards(link, limit=5):
         logo_2 = re.search(r'<div class="m-item-logo mod-right">[\s\S]*?<img src="(//[^"]+)"', block)
         date = re.search(r'<div class="m-item-date">[\s\S]*?<div>\s*(.*?)\s*</div>\s*(.*?)\s*</div>', block)
 
-    # results.append({
-    #     "match_url": "https://www.vlr.gg" + url,
-    #     "event": event.group(1).strip() if event else None,
-    #     "stage": stage.group(1).strip() if stage else None,
-    #     "team_1": team_1,
-    #     "team_2": team_2,
-    #     "score": f"{score.group(1)} : {score.group(2)}" if score else None,
-    #     "team_1_logo": "https:" + logo_1.group(1) if logo_1 else None,
-    #     "team_2_logo": "https:" + logo_2.group(1) if logo_2 else None,
-    #     "date": date.group(1).strip() if date else None,
-    #     "time": date.group(2).strip() if date else None
-    # })
+        results.append({
+                    "match_url": "https://www.vlr.gg" + url,
+                    "event": event.group(1).strip() if event else None,
+                    "stage": match.group(1) if match else None,
+                    "team_1": team_1,
+                    "team_2": team_2,
+                    "score": f"{score.group(1)} : {score.group(2)}" if score else None,
+                    "team_1_logo": "https:" + logo_1.group(1) if logo_1 else None,
+                    "team_2_logo": "https:" + logo_2.group(1) if logo_2 else None,
+                    "date": date.group(1).strip() if date else None,
+                    "time": date.group(2).strip() if date else None
+                })
+
     return results
   
 # print(extract_match_cards('https://www.vlr.gg/player/438/boaster'))
