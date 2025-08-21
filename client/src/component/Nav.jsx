@@ -1,7 +1,8 @@
 // rfce
-import React from "react";
+import React, { useState } from "react";
 import { House } from "lucide-react";
 import "./Body.css";
+import axios from "axios";
 
 function Nav() {
   return (
@@ -13,9 +14,10 @@ function Nav() {
           style={{ boxShadow: "0 0 8px rgba(255, 255, 255, 0.4)" }}
         >
           <div
-            className="relative w-full h-screen bg-cover bg-center"
+            className="relative w-full h-full bg-cover bg-center"
             style={{ backgroundImage: "url('/your-background.jpg')" }}
           >
+            
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-6">
               {/* ช่องค้นหา */}
               <div className="relative">
@@ -38,7 +40,7 @@ function Nav() {
                 <input
                   type="text"
                   placeholder="Search..."
-                  className="w-[350px] p-5 ps-14 text-xl text-white bg-black/40 border border-white/30 rounded-2xl shadow-[0_0_20px_rgba(0,255,255,0.6)] backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all duration-300"
+                  className="w-full max-w-[500px] p-5 ps-14 text-xl text-white bg-black/40 border border-white/30 rounded-2xl shadow-[0_0_20px_rgba(0,255,255,0.6)] backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all duration-300"
                 />
               </div>
 
@@ -48,7 +50,7 @@ function Nav() {
                 <button
                   className="flex items-center gap-2 px-6 py-2 text-white bg-black/40 border border-cyan-400 rounded-xl shadow-[0_0_15px_rgba(0,255,255,0.6)] hover:shadow-[0_0_25px_rgba(0,255,255,0.9)] hover:bg-cyan-500/20 active:scale-95 transition-all duration-300"
                   onClick={() =>
-                    window.open("https://github.com/your-repo", "_blank")
+                    window.open("https://github.com/MaKo114/TOC", "_blank")
                   }
                 >
                   <svg className="w-5 h-5 fill-white" viewBox="0 0 24 24">
@@ -60,7 +62,7 @@ function Nav() {
                 {/* CSV Button */}
                 <button
                   className="flex items-center gap-2 px-6 py-2 text-white bg-black/40 border border-cyan-400 rounded-xl shadow-[0_0_15px_rgba(0,255,255,0.6)] hover:shadow-[0_0_25px_rgba(0,255,255,0.9)] hover:bg-cyan-500/20 active:scale-95 transition-all duration-300"
-                  onClick={() => (window.location.href = "/your-file.csv")}
+                  onClick={() => handleTeam("fnatic")}
                 >
                   <svg className="w-5 h-5 fill-white" viewBox="0 0 24 24">
                     <path d="M4 4h16v2H4V4zm0 4h10v2H4V8zm0 4h16v2H4v-2zm0 4h10v2H4v-2z" />
