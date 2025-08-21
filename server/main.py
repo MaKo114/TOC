@@ -54,3 +54,8 @@ def download_csv():
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
 
+
+
+team = get_europe_team_info()
+for i in team:
+    print(i)
