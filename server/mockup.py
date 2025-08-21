@@ -71,7 +71,7 @@ def get_team_players(team):
                 alias = re.sub(r'<[^>]+>', '', alias_match.group(1)).strip() if alias_match else None
                 real_name = re.sub(r'<[^>]+>', '', realname_match.group(1)).strip() if realname_match else None
                 roles = [re.sub(r'<[^>]+>', '', r).strip() for r in role_matches]
-                image = "https:" + img_match.group(1) if img_match else None
+                image = "https:" + img_match.group(1) if img_match else 'https://vlr.gg/img/base/ph/sil.png'
                 flag = flag_match.group(1).upper() if flag_match else None
                 path = href_match.group(1) if href_match else None
                 type_ = classify_type(roles)
