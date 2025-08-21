@@ -274,9 +274,3 @@ def export_all_team_data_to_csv(filename="full_team_data.csv"):
         writer.writeheader()
         for row in all_rows:
             writer.writerow(row)
-
-
-
-# players = parse_vlr_roster('https://www.vlr.gg/team/2593/fnatic')
-# for i in players:
-#     print(i)

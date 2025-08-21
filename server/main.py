@@ -53,9 +53,3 @@ def download_csv():
         return FileResponse(path=filename, filename=filename, media_type='text/csv')
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
-
-
-
-team = get_europe_team_info()
-for i in team:
-    print(i)
