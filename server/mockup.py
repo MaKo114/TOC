@@ -263,4 +263,3 @@ for  i in lst:
 #             players = re.findall(pattern, html, re.IGNORECASE)
 
 #             return [p.strip() for p in players]
-
