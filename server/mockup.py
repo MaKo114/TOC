@@ -48,7 +48,7 @@ def get_team_players(team):
     data = get_europe_team_info()
     
     def classify_type(roles):
-        staff_roles = {"manager", "head coach", "assistant coach", "performance coach"}
+        staff_roles = {"manager", "head coach", "assistant coach", "performance coach", 'coach'}
         return "staff" if any(r.lower() in staff_roles for r in roles) else "player"
     
     for i in data:
@@ -230,8 +230,8 @@ def extract_all_team_info(team, name):
         "current_team": current_team,
         "past_teams": past_teams
     }
-
-
+    
+    
 def export_team_names_to_csv(filename="team_names.csv"):
     team_names = get_europe_team_info()
     with open(filename, mode="w", newline="", encoding="utf-8") as file:
@@ -240,5 +240,3 @@ def export_team_names_to_csv(filename="team_names.csv"):
         for name in team_names:
             writer.writerow([name])
     print(f"บันทึกชื่อทีมทั้งหมดลงไฟล์ {filename} แล้ว")
-
-

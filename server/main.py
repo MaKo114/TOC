@@ -42,6 +42,4 @@ def player_info(team: str, name: str):
             "recent_team": recent_team
         }
     except Exception as e:
-        return JSONResponse(status_code=500, content={"error": str(e)})
-
 
