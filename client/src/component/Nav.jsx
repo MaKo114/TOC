@@ -38,8 +38,9 @@ function Nav() {
                 <input
                   type="text"
                   placeholder="Search..."
-                  className="w-[350px] p-5 ps-14 text-xl text-white bg-black/40 border border-white/30 rounded-2xl shadow-[0_0_20px_rgba(0,255,255,0.6)] backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all duration-300"
-                />
+                  className="w-full max-w-[500px] p-5 ps-14 text-xl text-white bg-black/40 border border-white/30 rounded-2xl shadow-[0_0_20px_rgba(0,255,255,0.6)] backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all duration-300"
+/>
+
               </div>
 
               {/* ปุ่ม GitHub และ CSV */}
@@ -48,7 +49,7 @@ function Nav() {
                 <button
                   className="flex items-center gap-2 px-6 py-2 text-white bg-black/40 border border-cyan-400 rounded-xl shadow-[0_0_15px_rgba(0,255,255,0.6)] hover:shadow-[0_0_25px_rgba(0,255,255,0.9)] hover:bg-cyan-500/20 active:scale-95 transition-all duration-300"
                   onClick={() =>
-                    window.open("https://github.com/your-repo", "_blank")
+                    window.open("https://github.com/MaKo114/TOC", "_blank")
                   }
                 >
                   <svg className="w-5 h-5 fill-white" viewBox="0 0 24 24">
