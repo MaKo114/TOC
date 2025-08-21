@@ -51,3 +51,22 @@ def download_csv():
     filename = "full_team_data.csv"
 
     try:
+        # สร้างไฟล์ CSV
+        export_team_names_to_csv(filename=filename)
+
+        # ตรวจสอบว่าไฟล์ถูกสร้างจริง
+        if not os.path.exists(filename):
+            raise FileNotFoundError(f"ไม่พบไฟล์: {filename}")
+
+        # ส่งไฟล์กลับ
+        return FileResponse(
+            path=filename,  
+            filename=filename,
+            media_type="text/csv"
+        )
+
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"error": f"เกิดข้อผิดพลาด: {str(e)}"}
+        )
