@@ -236,18 +236,3 @@ def extract_all_team_info(team, name):
 def export_team_names_to_csv(filename="team_names.csv"):
     team_names = get_europe_team_info()
     with open(filename, mode="w", newline="", encoding="utf-8") as file:
-        writer = csv.writer(file)
-        writer.writerow(["Team Name"])
-        for name in team_names:
-            writer.writerow([name])
-    print(f"✅ บันทึกชื่อทีมทั้งหมดลงไฟล์ {filename} แล้ว")
-
-
-
-player = get_team_players('HGE Esport')
-for i in player:
-    print(i)
-
-# players = parse_vlr_roster('https://www.vlr.gg/team/2593/fnatic')
-# for i in players:
-#     print(i)
