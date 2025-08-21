@@ -159,7 +159,7 @@ function Content() {
                 </div>
               ))
             : team
-                .filter((profile) => profile.type === "player")
+                .filter((profile) => profile.type === "staff")
                 .map((profile, index) => (
                   <a
                     key={index}
