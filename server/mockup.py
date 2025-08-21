@@ -46,7 +46,6 @@ def get_europe_team_info(base_url='https://www.vlr.gg'):
 # def get_team_players(team):
 def get_team_players(team):
     data = get_europe_team_info()
-    print(data)
     
     def classify_type(roles):
         staff_roles = {"manager", "head coach", "assistant coach", "performance coach"}
@@ -240,13 +239,13 @@ def export_team_names_to_csv(filename="team_names.csv"):
         writer.writerow(["Team Name"])
         for name in team_names:
             writer.writerow([name])
-    print(f"✅ บันทึกชื่อทีมทั้งหมดลงไฟล์ {filename} แล้ว")
+    print(f"บันทึกชื่อทีมทั้งหมดลงไฟล์ {filename} แล้ว")
 
 
 
-player = get_team_players('HGE Esport')
-for i in player:
-    print(i)
+# player = get_team_players('HGE Esport')
+# for i in player:
+#     print(i)
 
 # players = parse_vlr_roster('https://www.vlr.gg/team/2593/fnatic')
 # for i in players:
