@@ -270,7 +270,4 @@ def export_all_team_data_to_csv(filename="full_team_data.csv"):
     # Export to CSV
     fieldnames = list(all_rows[0].keys())
     with open(filename, mode="w", newline="", encoding="utf-8") as file:
-        writer = csv.DictWriter(file, fieldnames=fieldnames)
-        writer.writeheader()
-        for row in all_rows:
-            writer.writerow(row)
+       

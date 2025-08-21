@@ -48,8 +48,4 @@ def player_info(team: str, name: str):
 @app.get('/csv')
 def download_csv():
     try:
-        filename = "full_team_data.csv"
-        export_all_team_data_to_csv(filename=filename)
-        return FileResponse(path=filename, filename=filename, media_type='text/csv')
-    except Exception as e:
-        return JSONResponse(status_code=500, content={"error": str(e)})
+      
