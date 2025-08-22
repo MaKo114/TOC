@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
+import Flag from "react-world-flags";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 function Content() {
   const [fetch, setFetch] = useState();
@@ -8,8 +10,10 @@ function Content() {
   const [selectedTeam, setSelectedTeam] = useState(null);
 
   const handleTeam = async (value) => {
+    if (value === selectedTeam) return; // ถ้าเลือกทีมเดิม ไม่ต้อง fetch ใหม่
     setIsLoading(true);
     setSelectedTeam(value);
+    localStorage.setItem("selectedTeam", value);
     try {
       const res = await axios.get(
         `http://127.0.0.1:8000/team/players/${value}`
@@ -21,21 +25,40 @@ function Content() {
       setIsLoading(false);
     }
   };
-  const handlefetch = async () => {
+  const handlefetch = async (initialTeam) => {
     try {
       const res = await axios.get("http://127.0.0.1:8000/teams");
       setFetch(res.data);
+
+      const teamToLoad = initialTeam || res.data[0]?.name;
+      if (teamToLoad) {
+        setSelectedTeam(teamToLoad);
+        const teamRes = await axios.get(
+          `http://127.0.0.1:8000/team/players/${teamToLoad}`
+        );
+        setTeam(teamRes.data);
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    handlefetch();
+    const savedTeam = localStorage.getItem("selectedTeam");
+    handlefetch(savedTeam);
   }, []);
+
+  useEffect(() => {
+    if (fetch && fetch.length > 0 && !selectedTeam) {
+      handleTeam(fetch[0].name);
+    }
+  }, [fetch]);
   return (
     <div className="px-8 mt-5 flex flex-col md:flex-row w-full gap-5 mb-10">
       {/* ฝั่งซ้าย 30% (หรือ 100% บนมือถือ) */}
+
       <div
         className="w-full md:flex-[0_0_30%] h-[400px] md:h-[800px] bg-[#E7E6E3] rounded-md shadow-lg overflow-y-auto"
         style={{ boxShadow: "0 0 8px rgba(255, 255, 255, 0.4)" }}
@@ -112,9 +135,9 @@ function Content() {
             : team
                 .filter((profile) => profile.type === "player")
                 .map((profile, index) => (
-                  <a
+                  <Link
+                    to={`/player-detail/${selectedTeam}/${profile.alias}`}
                     key={index}
-                    href={profile.alias}
                     className="flex items-center bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 p-4 w-full sm:w-[48%] lg:w-[30%] xl:w-[22%] min-w-[250px]"
                   >
                     <img
@@ -123,12 +146,13 @@ function Content() {
                       alt={profile.alias}
                     />
                     <div className="px-4 w-full max-w-[180px] overflow-hidden text-ellipsis whitespace-nowrap">
-                      <div className="text-lg font-semibold text-black">
+                      <div className="flex items-center gap-5 text-lg font-semibold text-black">
+                        <Flag code={profile.flag} className="w-8 h-8"></Flag>
                         {profile.alias}
                       </div>
                       <div className="text-gray-600">{profile.real_name}</div>
                     </div>
-                  </a>
+                  </Link>
                 ))}
         </div>
 
@@ -161,9 +185,9 @@ function Content() {
             : team
                 .filter((profile) => profile.type === "staff")
                 .map((profile, index) => (
-                  <a
+                  <Link
+                    to={`/player-detail/${selectedTeam}/${profile.alias}`}
                     key={index}
-                    href={profile.alias}
                     className="flex items-center bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 p-4 w-full sm:w-[48%] lg:w-[30%] xl:w-[22%] min-w-[250px]"
                   >
                     <img
@@ -172,12 +196,13 @@ function Content() {
                       alt={profile.alias}
                     />
                     <div className="px-4">
-                      <div className="text-lg font-semibold text-black">
+                      <div className="flex items-center gap-5 text-lg font-semibold text-black">
+                        <Flag code={profile.flag} className="w-8 h-8"></Flag>
                         {profile.alias}
                       </div>
                       <div className="text-gray-600">{profile.real_name}</div>
                     </div>
-                  </a>
+                  </Link>
                 ))}
         </div>
       </div>
