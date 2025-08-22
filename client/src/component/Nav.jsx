@@ -5,6 +5,20 @@ import "./Body.css";
 import axios from "axios";
 
 function Nav() {
+  const csvButton = async () => {
+    const res = await axios.get("http://127.0.0.1:8000/download/team-names", {
+      responseType: "blob",
+    });
+
+    const url = window.URL.createObjectURL(new Blob([res.data]));
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "team_names.csv");
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
+
   return (
     <div>
       <div className="flex flex-col md:flex-row w-full gap-5 px-8 mt-10">
@@ -17,7 +31,6 @@ function Nav() {
             className="relative w-full h-full bg-cover bg-center"
             style={{ backgroundImage: "url('/your-background.jpg')" }}
           >
-            
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-6">
               {/* ช่องค้นหา */}
               <div className="relative">
@@ -62,7 +75,7 @@ function Nav() {
                 {/* CSV Button */}
                 <button
                   className="flex items-center gap-2 px-6 py-2 text-white bg-black/40 border border-cyan-400 rounded-xl shadow-[0_0_15px_rgba(0,255,255,0.6)] hover:shadow-[0_0_25px_rgba(0,255,255,0.9)] hover:bg-cyan-500/20 active:scale-95 transition-all duration-300"
-                  onClick={() => handleTeam("fnatic")}
+                  onClick={() => csvButton()}
                 >
                   <svg className="w-5 h-5 fill-white" viewBox="0 0 24 24">
                     <path d="M4 4h16v2H4V4zm0 4h10v2H4V8zm0 4h16v2H4v-2zm0 4h10v2H4v-2z" />

@@ -2,7 +2,8 @@ from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 import os
-from mockup import *
+from controller import *
+
 
 app = FastAPI()
 
@@ -42,4 +43,20 @@ def player_info(team: str, name: str):
             "recent_team": recent_team
         }
     except Exception as e:
-
+        return JSONResponse(status_code=500, content={"error": str(e)})
+    
+    
+    
+@app.get("/download/team-names")
+def download_team_names():
+    try:
+        filename = "team_names.csv"
+        export_team_names_to_csv(filename)
+        file_path = os.path.abspath(filename)
+        return FileResponse(
+            path=file_path,
+            filename=filename,
+            media_type="text/csv"
+        )
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})

@@ -18,7 +18,7 @@ def get_europe_team_info(base_url='https://www.vlr.gg'):
     league_pattern = r'<a href="(/rankings/[a-z\-]+)"'
     league_paths = list(set(re.findall(league_pattern, html_main, re.IGNORECASE)))
     europe_leagues = [path for path in league_paths if any(k in path.lower() for k in ['europe', 'emea', 'eu'])]
-
+  
     team_pattern = r'<a href="(/team/\d+/[^"]+)"[^>]*>[\s\S]*?<img[^>]+src="([^"]+)"[^>]*>[\s\S]*?<div[^>]*class="ge-text">([\s\S]*?)</div>'
     team_data = []
 
@@ -29,7 +29,12 @@ def get_europe_team_info(base_url='https://www.vlr.gg'):
         for href, logo_src, name in teams:
             clean_name = re.sub(r'<[^>]+>', '', name)
             clean_name = re.sub(r'\s+', ' ', clean_name).strip()
-            clean_name = re.sub(r'\s+#\w+\s+[A-Za-z]+$', '', clean_name)
+
+            # ลบ hash tag เช่น #B1M6
+            clean_name = re.sub(r'#\w+', '', clean_name)
+
+            # ลบชื่อประเทศที่อาจติดมา
+            clean_name = re.sub(r'\b[A-Z][a-z]+(?: [A-Z][a-z]+)*$', '', clean_name).strip()
             if logo_src == '/img/vlr/tmp/vlr.png':
                 logo_src = '//www.vlr.gg' + logo_src
             
@@ -45,6 +50,11 @@ def get_europe_team_info(base_url='https://www.vlr.gg'):
 
 # def get_team_players(team):
 def get_team_players(team):
+    
+    cache_key = f"players:{team.lower()}"
+    if cache_key in _cache:
+        return _cache[cache_key]
+    
     data = get_europe_team_info()
     
     def classify_type(roles):
@@ -85,13 +95,17 @@ def get_team_players(team):
                     "flag": flag,
                     "path": path
                 })
-
+            _cache[cache_key] = roster
             return roster
 
 
 
 
 def player_detail(team, name):
+    cache_key = f"detail:{team.lower()}:{name.lower()}"
+    if cache_key in _cache:
+        return _cache[cache_key]
+
     base_url = 'https://www.vlr.gg'
     members = get_team_players(team)
     if members:
@@ -131,7 +145,7 @@ def player_detail(team, name):
                     r'<div[^>]*class="wf-avatar mod-player"[^>]*>[\s\S]*?<img[^>]+src="([^"]+)"', html.text)
                 img_url = 'https:' + img_match.group(1) if img_match else None
 
-                return {
+                result =  {
                     "alias": alias,
                     "real_name": real_name,
                     "image": img_url,
@@ -142,22 +156,40 @@ def player_detail(team, name):
                     },
                     "href": link 
                 }
+                _cache[cache_key] = result
+                return result
 
     return 'not found'
 
+
 def extract_match_cards(team, name, limit=5):
+    cache_key = f"match_cards:{team.lower()}:{name.lower()}"
+    if cache_key in _cache:
+        return _cache[cache_key]
+
     player = player_detail(team, name)
     html = requests.get(player['href'])
     cards = re.findall(r'<a href="(/[^"]+)"[^>]*class="wf-card[^"]*">([\s\S]*?)</a>', html.text)
+
+    pattern = re.compile(
+        r'<div class="m-item-event[^>]*>.*?<div[^>]*class="text-of"[^>]*>\s*(VCT\s+\d{2,4}:[^<]+)\s*</div>\s*(Group Stage|Playoffs|Swiss Stage|Knockout|Finals|Upper Bracket|Lower Bracket)\s*(?:&sdot;|⋅)\s*(W\d+|UR\d+|LR\d+|R\d+|QF|SF|F)\s*</div>',
+        re.DOTALL
+    )
+
     results = []
 
     for url, block in cards[:limit]:
-        event = re.search(r'<div[^>]*font-weight:\s*700[^>]*class="text-of">\s*(.*?)\s*</div>', block)
-        match = re.search(r'Group Stage\s*(?:⋅|&sdot;)\s*(W\d+)', block, re.DOTALL)
+        event_name, stage_name = None, None
+
+        match = pattern.search(block)
+        if match:
+            event_name = match.group(1).strip()
+            stage_name = f"{match.group(2)} ⋅ {match.group(3)}"
 
         team_names = re.findall(r'<span[^>]*class="m-item-team-name"[^>]*>\s*(.*?)\s*</span>', block)
         team_1 = team_names[0].strip() if len(team_names) > 0 else None
         team_2 = team_names[1].strip() if len(team_names) > 1 else None
+
         score = re.search(r'<div class="m-item-result[^>]*">[\s\S]*?<span>(\d+)</span>[\s\S]*?<span>(\d+)</span>', block)
         logo_1 = re.search(r'<div class="m-item-logo">[\s\S]*?<img src="(//[^"]+)"', block)
         logo_2 = re.search(r'<div class="m-item-logo mod-right">[\s\S]*?<img src="(//[^"]+)"', block)
@@ -165,8 +197,8 @@ def extract_match_cards(team, name, limit=5):
 
         results.append({
             "match_url": "https://www.vlr.gg" + url,
-            "event": event.group(1).strip() if event else None,
-            "stage": match.group(1) if match else None,
+            "event": event_name,
+            "stage": stage_name,
             "team_1": team_1,
             "team_2": team_2,
             "score": f"{score.group(1)} : {score.group(2)}" if score else None,
@@ -176,9 +208,15 @@ def extract_match_cards(team, name, limit=5):
             "time": date.group(2).strip() if date else None
         })
 
+    _cache[cache_key] = results
     return results
+
+ 
  
 def extract_all_team_info(team, name):
+    cache_key = f"team_history:{team.lower()}:{name.lower()}"
+    if cache_key in _cache:
+        return _cache[cache_key]
     player = player_detail(team, name)
     html = requests.get(player['href']).text
     base_url = 'https://www.vlr.gg'
@@ -226,12 +264,14 @@ def extract_all_team_info(team, name):
                 "href": href
             })
 
-    return {
+    result = {
         "current_team": current_team,
         "past_teams": past_teams
     }
+    _cache[cache_key] = result
+    return result
     
-    
+        
 def export_team_names_to_csv(filename="team_names.csv"):
     team_names = get_europe_team_info()
     with open(filename, mode="w", newline="", encoding="utf-8") as file:
@@ -240,3 +280,4 @@ def export_team_names_to_csv(filename="team_names.csv"):
         for name in team_names:
             writer.writerow([name])
     print(f"บันทึกชื่อทีมทั้งหมดลงไฟล์ {filename} แล้ว")
+
