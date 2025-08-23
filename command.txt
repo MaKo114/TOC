@@ -11,6 +11,47 @@ git push origin feature/search-api
 สร้าง branch  แล้วสลับไปเลย
 git switch -c feature/new-api
 
+///////////////////////////////////////////
+basic git 
+
+สร้าง Git repository ใหม่
+git init
+
+ดาวน์โหลด repo จาก remote (เช่น GitHub)
+git clone <url>
+
+ดูสถานะไฟล์ที่เปลี่ยนแปลง
+git status
+
+เพิ่มไฟล์เข้าสู่ staging area
+git add <file name> / git add . (add all file)
+
+บันทึกการเปลี่ยนแปลงพร้อมข้อความ
+git commit -m "text"
+
+ดูประวัติการ commit
+git log
+
+เปรียบเทียบความต่างของไฟล์
+git diff
+///////////////////////////
+Remote Response
+
+เชื่อมกับ remote repository
+git remote add origin <url>
+
+ส่ง commit ไปยัง remote ครั้งแรก
+git push -u origin main
+
+ส่ง commit ไปยัง remote
+git push
+
+ดึงการเปลี่ยนแปลงจาก remote
+git pull
+
+ดึงข้อมูลจาก remote โดยไม่ merge
+git fetch
+
 =====================================
 pip command 
 
