@@ -249,11 +249,11 @@ def extract_all_team_info(team, name):
     team_block_pattern = re.compile(
     r'<a[^>]*href="(?P<href>/team/\d+/[^"]+)"[^>]*>[\s\S]*?'
     r'<img[^>]+src="(?P<img>[^"]+)"[^>]*>[\s\S]*?'
-    r'<div[^>]*font-weight[^>]*>\s*(?P<name>.*?)\s*</div>'
-    r'(?:[\s\S]*?<div[^>]*class="ge-text-light"[^>]*>\s*(?P<status>.*?)\s*</div>)?',
+    r'<div[^>]*font-weight[^>]*>\s*(?P<name>.*?)\s*</div>[\s\S]*?'
+    r'<div[^>]*class="ge-text-light"[^>]*>\s*(?P<status1>.*?)\s*</div>[\s\S]*?'
+    r'<div[^>]*class="ge-text-light"[^>]*>\s*(?P<status2>.*?)\s*</div>',
     re.IGNORECASE
 )
-
     def normalize_logo_src(src):
         src = src.strip()
         if src.startswith('//'):
@@ -272,7 +272,11 @@ def extract_all_team_info(team, name):
         name = m.group("name").strip()
         href = base_url + m.group("href")
         logo = normalize_logo_src(m.group("img"))
-        status = m.group("status").strip() if m.group("status") else ""
+        status = ""
+        if m.group("status2") and "joined in" in m.group("status2").lower():
+            status = m.group("status2").strip()
+        elif m.group("status2") and "left in" in m.group("status2").lower():
+            status = m.group("status2").strip()
 
         if status.lower().startswith("joined in"):
             current_team = {
@@ -314,3 +318,9 @@ def export_team_names_to_csv(filename="team_names.csv"):
             writer.writerow([name])
     print(f"บันทึกชื่อทีมทั้งหมดลงไฟล์ {filename} แล้ว")
 
+
+
+a = extract_all_team_info('team fanta', 'phipsy')
+# a = extract_all_team_info('fnatic', 'boaster')
+
+print(a)
