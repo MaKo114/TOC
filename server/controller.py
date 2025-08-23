@@ -169,31 +169,56 @@ def extract_match_cards(team, name, limit=5):
 
     player = player_detail(team, name)
     html = requests.get(player['href'])
-    cards = re.findall(r'<a href="(/[^"]+)"[^>]*class="wf-card[^"]*">([\s\S]*?)</a>', html.text)
+    html_text = html.text.replace("&sdot;", "⋅")
 
-    pattern = re.compile(
-        r'<div class="m-item-event[^>]*>.*?<div[^>]*class="text-of"[^>]*>\s*(VCT\s+\d{2,4}:[^<]+)\s*</div>\s*(Group Stage|Playoffs|Swiss Stage|Knockout|Finals|Upper Bracket|Lower Bracket)\s*(?:&sdot;|⋅)\s*(W\d+|UR\d+|LR\d+|R\d+|QF|SF|F)\s*</div>',
-        re.DOTALL
-    )
+    cards = re.findall(r'<a href="(/[^"]+)"[^>]*class="[^"]*wf-card[^"]*"[^>]*>([\s\S]*?)</a>', html_text)
+
+    def extract_event_stage(block):
+        pattern = re.compile(
+            r'<div class="m-item-event[^>]*>[\s\S]*?<div[^>]*class="text-of"[^>]*>\s*(.*?)\s*</div>\s*([\w\s]+)\s*[⋅]\s*(\w+)',
+            re.DOTALL
+        )
+        match = pattern.search(block)
+        if match:
+            return match.group(1).strip(), f"{match.group(2).strip()} ⋅ {match.group(3).strip()}"
+        return None, None
+
+    def extract_logos(block):
+        logo_urls = re.findall(r'<div[^>]*class="m-item-logo(?: mod-right)?[^"]*"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"', block)
+        thumb_logo = re.search( r'<div[^>]*class="m-item-thumb[^"]*"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"', block)
+
+        def clean_logo(src):
+            if not src:
+                return "https://www.vlr.gg/img/vlr/tmp/vlr.png"
+            if "vlr/tmp/vlr.png" in src:
+                return "https://www.vlr.gg/img/vlr/tmp/vlr.png"
+            return "https:" + src if src.startswith("//") else "https://www.vlr.gg" + src
+
+        team_1_logo = clean_logo(logo_urls[0]) if len(logo_urls) > 0 else (
+            clean_logo(thumb_logo.group(1)) if thumb_logo else "https://www.vlr.gg/img/vlr/tmp/vlr.png"
+        )
+        team_2_logo = clean_logo(logo_urls[1]) if len(logo_urls) > 1 else "https://www.vlr.gg/img/vlr/tmp/vlr.png"
+
+        return team_1_logo, team_2_logo
 
     results = []
 
     for url, block in cards[:limit]:
-        event_name, stage_name = None, None
-
-        match = pattern.search(block)
-        if match:
-            event_name = match.group(1).strip()
-            stage_name = f"{match.group(2)} ⋅ {match.group(3)}"
+        event_name, stage_name = extract_event_stage(block)
 
         team_names = re.findall(r'<span[^>]*class="m-item-team-name"[^>]*>\s*(.*?)\s*</span>', block)
         team_1 = team_names[0].strip() if len(team_names) > 0 else None
         team_2 = team_names[1].strip() if len(team_names) > 1 else None
 
-        score = re.search(r'<div class="m-item-result[^>]*">[\s\S]*?<span>(\d+)</span>[\s\S]*?<span>(\d+)</span>', block)
-        logo_1 = re.search(r'<div class="m-item-logo">[\s\S]*?<img src="(//[^"]+)"', block)
-        logo_2 = re.search(r'<div class="m-item-logo mod-right">[\s\S]*?<img src="(//[^"]+)"', block)
-        date = re.search(r'<div class="m-item-date">[\s\S]*?<div>\s*(.*?)\s*</div>\s*(.*?)\s*</div>', block)
+        score = re.search(
+            r'<div class="m-item-result[^>]*">[\s\S]*?<span>(\d+)</span>[\s\S]*?<span>(\d+)</span>', block
+        )
+
+        team_1_logo, team_2_logo = extract_logos(block)
+
+        date = re.search(
+            r'<div class="m-item-date">[\s\S]*?<div>\s*(.*?)\s*</div>\s*(.*?)\s*</div>', block
+        )
 
         results.append({
             "match_url": "https://www.vlr.gg" + url,
@@ -202,8 +227,8 @@ def extract_match_cards(team, name, limit=5):
             "team_1": team_1,
             "team_2": team_2,
             "score": f"{score.group(1)} : {score.group(2)}" if score else None,
-            "team_1_logo": "https:" + logo_1.group(1) if logo_1 else None,
-            "team_2_logo": "https:" + logo_2.group(1) if logo_2 else None,
+            "team_1_logo": team_1_logo,
+            "team_2_logo": team_2_logo,
             "date": date.group(1).strip() if date else None,
             "time": date.group(2).strip() if date else None
         })
@@ -222,12 +247,12 @@ def extract_all_team_info(team, name):
     base_url = 'https://www.vlr.gg'
 
     team_block_pattern = re.compile(
-        r'<a[^>]*href="(?P<href>/team/\d+/[^"]+)"[^>]*>[\s\S]*?'
-        r'<img[^>]+src="(?P<img>[^"]+)"[^>]*>[\s\S]*?'
-        r'<div[^>]*font-weight[^>]*>\s*(?P<name>.*?)\s*</div>[\s\S]*?'
-        r'<div[^>]*class="ge-text-light"[^>]*>\s*(?P<status>(joined|left) in.*?)\s*</div>',
-        re.IGNORECASE
-    )
+    r'<a[^>]*href="(?P<href>/team/\d+/[^"]+)"[^>]*>[\s\S]*?'
+    r'<img[^>]+src="(?P<img>[^"]+)"[^>]*>[\s\S]*?'
+    r'<div[^>]*font-weight[^>]*>\s*(?P<name>.*?)\s*</div>'
+    r'(?:[\s\S]*?<div[^>]*class="ge-text-light"[^>]*>\s*(?P<status>.*?)\s*</div>)?',
+    re.IGNORECASE
+)
 
     def normalize_logo_src(src):
         src = src.strip()
@@ -247,7 +272,7 @@ def extract_all_team_info(team, name):
         name = m.group("name").strip()
         href = base_url + m.group("href")
         logo = normalize_logo_src(m.group("img"))
-        status = m.group("status").strip()
+        status = m.group("status").strip() if m.group("status") else ""
 
         if status.lower().startswith("joined in"):
             current_team = {
@@ -263,6 +288,14 @@ def extract_all_team_info(team, name):
                 "logo": logo,
                 "href": href
             })
+        elif not status and current_team is None:
+            # fallback: assume current team if no status and no current team yet
+            current_team = {
+                "name": name,
+                "joined": None,
+                "logo": logo,
+                "href": href
+            }
 
     result = {
         "current_team": current_team,
@@ -281,3 +314,10 @@ def export_team_names_to_csv(filename="team_names.csv"):
             writer.writerow([name])
     print(f"บันทึกชื่อทีมทั้งหมดลงไฟล์ {filename} แล้ว")
 
+
+
+a = extract_all_team_info('team fanta', 'phipsy')
+# a = extract_match_cards('fnatic', 'boaster')
+
+# for i in a :
+#     print(a[i])

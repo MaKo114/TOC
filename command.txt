@@ -10,3 +10,24 @@ git push origin feature/search-api
 
 สร้าง branch  แล้วสลับไปเลย
 git switch -c feature/new-api
+
+=====================================
+pip command 
+
+แสดง lib ทั้งหมดใน environment
+pip list
+
+แสดง version รายละเอียดต่างๆ
+pip show <ชื่อไลบรารี>
+
+สร้างไฟล์ requirements จาก environment ปัจจุบัน
+pip freeze > requirements.txt
+
+ติดตั้ง package ตามไฟล์ requirements
+pip install -r requirements.txt
+
+fastapi==0.115.8
+uvicorn==0.34.0
+requests>=2.32.0
+numpy
+
