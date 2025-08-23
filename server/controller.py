@@ -183,23 +183,33 @@ def extract_match_cards(team, name, limit=5):
             return match.group(1).strip(), f"{match.group(2).strip()} ⋅ {match.group(3).strip()}"
         return None, None
 
-    def extract_logos(block):
-        logo_urls = re.findall(r'<div[^>]*class="m-item-logo(?: mod-right)?[^"]*"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"', block)
-        thumb_logo = re.search( r'<div[^>]*class="m-item-thumb[^"]*"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"', block)
+    def clean_logo(src):
+        if not src:
+            return "https://www.vlr.gg/img/vlr/tmp/vlr.png"
+        if "vlr/tmp/vlr.png" in src:
+            return "https://www.vlr.gg/img/vlr/tmp/vlr.png"
+        if src.startswith("http"):
+            return src
+        if src.startswith("//"):
+            return "https:" + src
+        return "https://www.vlr.gg" + src
 
-        def clean_logo(src):
-            if not src:
-                return "https://www.vlr.gg/img/vlr/tmp/vlr.png"
-            if "vlr/tmp/vlr.png" in src:
-                return "https://www.vlr.gg/img/vlr/tmp/vlr.png"
-            return "https:" + src if src.startswith("//") else "https://www.vlr.gg" + src
-
-        team_1_logo = clean_logo(logo_urls[0]) if len(logo_urls) > 0 else (
-            clean_logo(thumb_logo.group(1)) if thumb_logo else "https://www.vlr.gg/img/vlr/tmp/vlr.png"
+    def extract_logos_and_thumb(block):
+        logo_urls = re.findall(
+            r'<div[^>]*class="m-item-logo(?: mod-right)?[^"]*"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"',
+            block
         )
-        team_2_logo = clean_logo(logo_urls[1]) if len(logo_urls) > 1 else "https://www.vlr.gg/img/vlr/tmp/vlr.png"
+        thumb_match = re.search(
+            r'<div[^>]*class="fc-flex m-item-thumb[^"]*"[^>]*>\s*<img[^>]*src="([^"]+)"',
+            block
+        )
+        event_thumb_raw = thumb_match.group(1).strip() if thumb_match else None
+        event_thumb = clean_logo(event_thumb_raw) if event_thumb_raw else None
 
-        return team_1_logo, team_2_logo
+        team_1_logo = clean_logo(logo_urls[0]) if len(logo_urls) > 0 else event_thumb or clean_logo(None)
+        team_2_logo = clean_logo(logo_urls[1]) if len(logo_urls) > 1 else clean_logo(None)
+
+        return team_1_logo, team_2_logo, event_thumb
 
     results = []
 
@@ -211,13 +221,15 @@ def extract_match_cards(team, name, limit=5):
         team_2 = team_names[1].strip() if len(team_names) > 1 else None
 
         score = re.search(
-            r'<div class="m-item-result[^>]*">[\s\S]*?<span>(\d+)</span>[\s\S]*?<span>(\d+)</span>', block
+            r'<div class="m-item-result[^>]*">[\s\S]*?<span>(\d+)</span>[\s\S]*?<span>(\d+)</span>',
+            block
         )
 
-        team_1_logo, team_2_logo = extract_logos(block)
+        team_1_logo, team_2_logo, event_thumb = extract_logos_and_thumb(block)
 
         date = re.search(
-            r'<div class="m-item-date">[\s\S]*?<div>\s*(.*?)\s*</div>\s*(.*?)\s*</div>', block
+            r'<div class="m-item-date">[\s\S]*?<div>\s*(.*?)\s*</div>\s*(.*?)\s*</div>',
+            block
         )
 
         results.append({
@@ -229,6 +241,7 @@ def extract_match_cards(team, name, limit=5):
             "score": f"{score.group(1)} : {score.group(2)}" if score else None,
             "team_1_logo": team_1_logo,
             "team_2_logo": team_2_logo,
+            "event_thumb": event_thumb,
             "date": date.group(1).strip() if date else None,
             "time": date.group(2).strip() if date else None
         })
@@ -354,7 +367,8 @@ def export_team_names_to_csv(filename="team_names.csv"):
 
 
 
-a = extract_all_team_info('fnatic', 'crashies')
+a = extract_match_cards('fnatic', 'crashies')
 # a = extract_all_team_info('fnatic', 'boaster')
 
-print(a)
+for i in a:
+    print(a)
