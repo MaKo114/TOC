@@ -370,5 +370,5 @@ def export_team_names_to_csv(filename="team_names.csv"):
 a = extract_match_cards('fnatic', 'crashies')
 # a = extract_all_team_info('fnatic', 'boaster')
 
-for i in a:
-    print(a)
+# for i in a:
+#     print(a)
