@@ -237,23 +237,15 @@ def extract_match_cards(team, name, limit=5):
     return results
 
  
- 
 def extract_all_team_info(team, name):
     cache_key = f"team_history:{team.lower()}:{name.lower()}"
     if cache_key in _cache:
         return _cache[cache_key]
+
     player = player_detail(team, name)
     html = requests.get(player['href']).text
     base_url = 'https://www.vlr.gg'
 
-    team_block_pattern = re.compile(
-    r'<a[^>]*href="(?P<href>/team/\d+/[^"]+)"[^>]*>[\s\S]*?'
-    r'<img[^>]+src="(?P<img>[^"]+)"[^>]*>[\s\S]*?'
-    r'<div[^>]*font-weight[^>]*>\s*(?P<name>.*?)\s*</div>[\s\S]*?'
-    r'<div[^>]*class="ge-text-light"[^>]*>\s*(?P<status1>.*?)\s*</div>[\s\S]*?'
-    r'<div[^>]*class="ge-text-light"[^>]*>\s*(?P<status2>.*?)\s*</div>',
-    re.IGNORECASE
-)
     def normalize_logo_src(src):
         src = src.strip()
         if src.startswith('//'):
@@ -265,41 +257,84 @@ def extract_all_team_info(team, name):
         else:
             return base_url + '/' + src
 
+    block_pattern = re.compile(r'<a[^>]*href="/team/\d+/[^"]+"[^>]*>[\s\S]*?</a>', re.IGNORECASE)
+    blocks = block_pattern.findall(html)
+
+    team_infos = []
+
+    for block in blocks:
+        href_match = re.search(r'href="(/team/\d+/[^"]+)"', block)
+        href = base_url + href_match.group(1) if href_match else None
+
+        logo_match = re.search(r'<img[^>]+src="([^"]+)"', block)
+        logo = normalize_logo_src(logo_match.group(1)) if logo_match else None
+
+        name_match = re.search(r'<div[^>]*font-weight[^>]*>\s*(.*?)\s*</div>', block)
+        team_name = name_match.group(1).strip() if name_match else None
+
+        status_blocks = re.findall(r'<div[^>]*class="ge-text-light"[^>]*>\s*(.*?)\s*</div>', block)
+        status_blocks = [s.strip() for s in status_blocks if s.strip()]
+
+        role_match = re.search(r'<span[^>]*class="wf-tag[^"]*"[^>]*>\s*(.*?)\s*</span>', block)
+        role = role_match.group(1).strip() if role_match else None
+
+        joined = None
+        left = None
+        inactive = None
+        period = None
+
+        for s in status_blocks:
+            s_lower = s.lower()
+            if "joined in" in s_lower:
+                joined = s.replace("joined in", "").strip()
+            elif "left in" in s_lower:
+                left = s.replace("left in", "").strip()
+            elif "inactive from" in s_lower:
+                inactive = s.replace("inactive from", "").strip()
+            elif re.match(r"\w+ \d{4} – \w+ \d{4}", s):
+                period = re.sub(r"\s*–\s*", "–", s.strip())
+
+        team_infos.append({
+            "name": team_name,
+            "logo": logo,
+            "href": href,
+            "role": role,
+            "joined": joined,
+            "left": left,
+            "period": period,
+            "inactive": inactive
+        })
+
+    def is_current(info):
+        if info["period"]:
+            left_date = info["period"].split("–")[-1].strip().lower()
+            return "present" in left_date or left_date == ""
+        return info["left"] is None
+
     current_team = None
     past_teams = []
 
-    for m in team_block_pattern.finditer(html):
-        name = m.group("name").strip()
-        href = base_url + m.group("href")
-        logo = normalize_logo_src(m.group("img"))
-        status = ""
-        if m.group("status2") and "joined in" in m.group("status2").lower():
-            status = m.group("status2").strip()
-        elif m.group("status2") and "left in" in m.group("status2").lower():
-            status = m.group("status2").strip()
+    for info in team_infos:
+        joined_date = info.get("joined")
+        left_date = info.get("left")
 
-        if status.lower().startswith("joined in"):
-            current_team = {
-                "name": name,
-                "joined": status.replace("joined in", "").strip(),
-                "logo": logo,
-                "href": href
-            }
-        elif status.lower().startswith("left in"):
-            past_teams.append({
-                "name": name,
-                "left": status.replace("left in", "").strip(),
-                "logo": logo,
-                "href": href
-            })
-        elif not status and current_team is None:
-            # fallback: assume current team if no status and no current team yet
-            current_team = {
-                "name": name,
-                "joined": None,
-                "logo": logo,
-                "href": href
-            }
+        if info["period"]:
+            joined_date, left_date = [p.strip() for p in info["period"].split("–")]
+
+        team_entry = {
+            "name": info["name"],
+            "joined": joined_date,
+            "left": left_date,
+            "logo": info["logo"],
+            "href": info["href"],
+            "role": info.get("role"),
+            "inactive": info.get("inactive")
+        }
+
+        if is_current(info) and current_team is None:
+            current_team = team_entry
+        else:
+            past_teams.append(team_entry)
 
     result = {
         "current_team": current_team,
@@ -307,7 +342,6 @@ def extract_all_team_info(team, name):
     }
     _cache[cache_key] = result
     return result
-    
         
 def export_team_names_to_csv(filename="team_names.csv"):
     team_names = get_europe_team_info()
@@ -320,7 +354,7 @@ def export_team_names_to_csv(filename="team_names.csv"):
 
 
 
-a = extract_all_team_info('team fanta', 'phipsy')
+a = extract_all_team_info('fnatic', 'crashies')
 # a = extract_all_team_info('fnatic', 'boaster')
 
 print(a)
