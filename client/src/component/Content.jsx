@@ -4,6 +4,7 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 
 function Content() {
+  const BASE_URL = import.meta.env.VITE_BASE_URL;
   const [fetch, setFetch] = useState();
   const [team, setTeam] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -16,7 +17,7 @@ function Content() {
     localStorage.setItem("selectedTeam", value);
     try {
       const res = await axios.get(
-        `http://127.0.0.1:8000/team/players/${value}`
+        `${BASE_URL}/team/players/${value}`
       );
       setTeam(res.data);
     } catch (err) {
@@ -27,14 +28,14 @@ function Content() {
   };
   const handlefetch = async (initialTeam) => {
     try {
-      const res = await axios.get("http://127.0.0.1:8000/teams");
+      const res = await axios.get(`${BASE_URL}/teams`);
       setFetch(res.data);
 
       const teamToLoad = initialTeam || res.data[0]?.name;
       if (teamToLoad) {
         setSelectedTeam(teamToLoad);
         const teamRes = await axios.get(
-          `http://127.0.0.1:8000/team/players/${teamToLoad}`
+          `${BASE_URL}/team/players/${teamToLoad}`
         );
         setTeam(teamRes.data);
       }

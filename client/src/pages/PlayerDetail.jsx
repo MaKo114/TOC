@@ -3,6 +3,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 
 const PlayerDetail = () => {
+  const BASE_URL = import.meta.env.VITE_BASE_URL;
   const { team, name } = useParams();
   const [playerDetail, setPlayerDetail] = useState(null);
 
@@ -10,7 +11,7 @@ const PlayerDetail = () => {
     const fetchPlayer = async () => {
       try {
         const res = await axios.get(
-          `http://127.0.0.1:8000/team/player-info/?team=${team}&name=${name}`
+          `${BASE_URL}/team/player-info/?team=${team}&name=${name}`
         );
         setPlayerDetail(res.data);
       } catch (err) {
@@ -22,29 +23,70 @@ const PlayerDetail = () => {
   }, []);
 
   return (
-    <div className="text-white">
-      <h1>Player Detail Page</h1>
+    <div className="text-white px-4 py-6">
+      <h1 className="text-3xl font-bold mb-4">Player Detail</h1>
+
       {playerDetail ? (
-        <div>
-          <p>ชื่อ: {playerDetail.detail.real_name}</p>
+        <div className="mb-6">
+          <p>ชื่อจริง: {playerDetail.detail.real_name}</p>
           <p>Alias: {playerDetail.detail.alias}</p>
-          <p>Team: {team}</p>
-          {/* เพิ่มข้อมูลอื่น ๆ ตามที่ API ส่งมา */}
+          <p>Team Param: {team}</p>
+          <p>Country: {playerDetail.detail.country?.name}</p>
+          <div className="flex gap-4 mt-2">
+            {playerDetail.detail.social?.map((link, i) => (
+              <a
+                key={i}
+                href={link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 underline"
+              >
+                {link.includes("twitch") ? "Twitch" : "Twitter"}
+              </a>
+            ))}
+          </div>
         </div>
       ) : (
-        <p>Loading...</p>
+        <p>Loading player info...</p>
       )}
 
-      <h1>Recent matches</h1>
+        
+
+      <h2 className="text-2xl font-bold mb-4">Recent Matches</h2>
       <div>
-        {playerDetail && Array.isArray(playerDetail.matches) ? (
+        {playerDetail?.matches?.length ? (
           playerDetail.matches.map((item, index) => (
-            <div key={index} className="mb-4 p-4 bg-gray-800 rounded-lg">
-              <p className="text-lg font-semibold">{item.event}</p>
-              <p>Stage: {item.stage}</p>
-              <p>
-                {item.team_1} vs {item.team_2}
-              </p>
+            <div
+              key={index}
+              className="mb-4 p-4 bg-gray-800 rounded-lg flex gap-4 items-center"
+            >
+              {/* Event Thumbnail */}
+              <img
+                src={
+                  item.event_thumb || "https://www.vlr.gg/img/vlr/tmp/vlr.png"
+                }
+                alt={item.event}
+                className="h-16 w-16 object-cover rounded-md"
+              />
+
+              {/* Match Info */}
+              <div>
+                <p className="text-lg font-semibold">{item.event}</p>
+                <p className="text-gray-400">{item.stage}</p>
+                <p className="text-white">
+                  {item.team_1} vs {item.team_2}
+                </p>
+                {item.score && (
+                  <p className="text-green-400 font-bold mt-1">
+                    Score: {item.score}
+                  </p>
+                )}
+                {item.date && item.time && (
+                  <p className="text-sm text-gray-500">
+                    {item.date} at {item.time}
+                  </p>
+                )}
+              </div>
             </div>
           ))
         ) : (
@@ -52,33 +94,7 @@ const PlayerDetail = () => {
         )}
       </div>
 
-      <h2 className="text-2xl font-bold text-white mb-4">Current Team</h2>
-      {playerDetail?.recent_team?.current_team && (
-        <a
-          href={playerDetail.recent_team.current_team.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block mb-6 p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition"
-        >
-          <div className="flex items-center gap-4">
-            <img
-              src={playerDetail.recent_team.current_team.logo}
-              alt={playerDetail.recent_team.current_team.name}
-              className="h-16 w-16 object-contain"
-            />
-            <div>
-              <p className="text-lg font-semibold text-white">
-                {playerDetail.recent_team.current_team.name}
-              </p>
-              <p className="text-gray-400">
-                Joined: {playerDetail.recent_team.current_team.joined}
-              </p>
-            </div>
-          </div>
-        </a>
-      )}
-
-      <h2 className="text-2xl font-bold text-white mb-4">Past Teams</h2>
+      <h2 className="text-2xl font-bold mb-4">Past Teams</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {playerDetail?.recent_team?.past_teams?.map((team, index) => (
           <a
@@ -95,8 +111,22 @@ const PlayerDetail = () => {
                 className="h-16 w-16 object-contain"
               />
               <div>
-                <p className="text-lg font-semibold text-white">{team.name}</p>
-                <p className="text-gray-400">Left: {team.left}</p>
+                <p className="text-lg font-semibold text-white">
+                  {team.name}
+                  {team.role ? ` (${team.role})` : ""}
+                </p>
+                <p className="text-gray-400">
+                  {team.joined && team.left
+                    ? `Period: ${team.joined} – ${team.left}`
+                    : team.left
+                    ? `Left: ${team.left}`
+                    : "No date info"}
+                </p>
+                {team.inactive && (
+                  <p className="text-red-400 italic">
+                    Inactive from {team.inactive}
+                  </p>
+                )}
               </div>
             </div>
           </a>
