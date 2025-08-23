@@ -314,10 +314,3 @@ def export_team_names_to_csv(filename="team_names.csv"):
             writer.writerow([name])
     print(f"บันทึกชื่อทีมทั้งหมดลงไฟล์ {filename} แล้ว")
 
-
-
-a = extract_all_team_info('team fanta', 'phipsy')
-# a = extract_match_cards('fnatic', 'boaster')
-
-# for i in a :
-#     print(a[i])

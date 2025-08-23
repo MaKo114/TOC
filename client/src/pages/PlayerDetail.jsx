@@ -3,6 +3,8 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 
 const PlayerDetail = () => {
+  const BASE_URL = import.meta.env.VITE_BASE_URL;
+
   const { team, name } = useParams();
   const [playerDetail, setPlayerDetail] = useState(null);
 
@@ -10,7 +12,7 @@ const PlayerDetail = () => {
     const fetchPlayer = async () => {
       try {
         const res = await axios.get(
-          `http://127.0.0.1:8000/team/player-info/?team=${team}&name=${name}`
+          `${BASE_URL}/team/player-info/?team=${team}&name=${name}`
         );
         setPlayerDetail(res.data);
       } catch (err) {
