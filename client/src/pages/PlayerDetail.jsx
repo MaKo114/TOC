@@ -10,7 +10,7 @@ const PlayerDetail = () => {
     const fetchPlayer = async () => {
       try {
         const res = await axios.get(
-          `https://toc-5ral.onrender.com/team/player-info/?team=${team}&name=${name}`
+          `https://toc-backend-78wq.onrender.com/team/player-info/?team=${team}&name=${name}`
         );
         setPlayerDetail(res.data);
       } catch (err) {
