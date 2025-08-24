@@ -1,18 +1,24 @@
 import React, { useEffect, useState } from "react";
+import Flag from "react-world-flags";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
-function Content() {
-  const [fetch, setFetch] = useState();
+function Content({ searchTerm }) {
+  const [allTeams, setAllTeams] = useState([]); // ข้อมูลทั้งหมด
+  const [filteredTeams, setFilteredTeams] = useState([]); // ข้อมูลที่กรองแล้ว
+
   const [team, setTeam] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTeam, setSelectedTeam] = useState(null);
 
   const handleTeam = async (value) => {
+    if (value === selectedTeam) return; // ถ้าเลือกทีมเดิม ไม่ต้อง fetch ใหม่
     setIsLoading(true);
     setSelectedTeam(value);
+    localStorage.setItem("selectedTeam", value);
     try {
       const res = await axios.get(
-        `http://127.0.0.1:8000/team/players/${value}`
+        `https://toc-backend-78wq.onrender.com/team/players/${value}`
       );
       setTeam(res.data);
     } catch (err) {
@@ -21,21 +27,48 @@ function Content() {
       setIsLoading(false);
     }
   };
-  const handlefetch = async () => {
+  const handlefetch = async (initialTeam) => {
     try {
-      const res = await axios.get("http://127.0.0.1:8000/teams");
-      setFetch(res.data);
+      const res = await axios.get(
+        `https://toc-backend-78wq.onrender.com/teams`
+      );
+      const teams = Array.isArray(res.data) ? res.data : [];
+      setAllTeams(teams);
+      setFilteredTeams(teams); // เริ่มต้นแสดงทั้งหมด
+
+      const teamToLoad = initialTeam || teams[0]?.name;
+      if (teamToLoad) {
+        setSelectedTeam(teamToLoad);
+        const teamRes = await axios.get(
+          `https://toc-backend-78wq.onrender.com/team/players/${teamToLoad}`
+        );
+        setTeam(teamRes.data);
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    handlefetch();
+    const savedTeam = localStorage.getItem("selectedTeam");
+    handlefetch(savedTeam);
   }, []);
+  useEffect(() => {
+    if (searchTerm.trim() === "") {
+      setFilteredTeams(allTeams);
+    } else {
+      const filtered = allTeams.filter((team) =>
+        team.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredTeams(filtered);
+    }
+  }, [searchTerm, allTeams]);
   return (
     <div className="px-8 mt-5 flex flex-col md:flex-row w-full gap-5 mb-10">
       {/* ฝั่งซ้าย 30% (หรือ 100% บนมือถือ) */}
+
       <div
         className="w-full md:flex-[0_0_30%] h-[400px] md:h-[800px] bg-[#E7E6E3] rounded-md shadow-lg overflow-y-auto"
         style={{ boxShadow: "0 0 8px rgba(255, 255, 255, 0.4)" }}
@@ -52,8 +85,8 @@ function Content() {
         </div>
 
         <div className="flex flex-col gap-4 px-5 pb-5 text-black text-xl ">
-          {fetch &&
-            fetch.map((item, index) => {
+          {filteredTeams &&
+            filteredTeams.map((item, index) => {
               const isSelected = selectedTeam === item.name;
               return (
                 <button
@@ -110,11 +143,11 @@ function Content() {
                 </div>
               ))
             : team
-                .filter((profile) => profile.type === "player")
+                .filter((profile) => profile.type === "player" && profile.alias)
                 .map((profile, index) => (
-                  <a
+                  <Link
+                    to={`/player-detail/${selectedTeam}/${profile.alias}`}
                     key={index}
-                    href={profile.alias}
                     className="flex items-center bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 p-4 w-full sm:w-[48%] lg:w-[30%] xl:w-[22%] min-w-[250px]"
                   >
                     <img
@@ -123,12 +156,13 @@ function Content() {
                       alt={profile.alias}
                     />
                     <div className="px-4 w-full max-w-[180px] overflow-hidden text-ellipsis whitespace-nowrap">
-                      <div className="text-lg font-semibold text-black">
+                      <div className="flex items-center gap-5 text-lg font-semibold text-black">
+                        <Flag code={profile.flag} className="w-8 h-8"></Flag>
                         {profile.alias}
                       </div>
                       <div className="text-gray-600">{profile.real_name}</div>
                     </div>
-                  </a>
+                  </Link>
                 ))}
         </div>
 
@@ -159,11 +193,11 @@ function Content() {
                 </div>
               ))
             : team
-                .filter((profile) => profile.type === "staff")
+                .filter((profile) => profile.type === "staff" && profile.alias)
                 .map((profile, index) => (
-                  <a
+                  <Link
+                    to={`/player-detail/${selectedTeam}/${profile.alias}`}
                     key={index}
-                    href={profile.alias}
                     className="flex items-center bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 p-4 w-full sm:w-[48%] lg:w-[30%] xl:w-[22%] min-w-[250px]"
                   >
                     <img
@@ -172,12 +206,13 @@ function Content() {
                       alt={profile.alias}
                     />
                     <div className="px-4">
-                      <div className="text-lg font-semibold text-black">
+                      <div className="flex items-center gap-5 text-lg font-semibold text-black">
+                        <Flag code={profile.flag} className="w-8 h-8"></Flag>
                         {profile.alias}
                       </div>
                       <div className="text-gray-600">{profile.real_name}</div>
                     </div>
-                  </a>
+                  </Link>
                 ))}
         </div>
       </div>
@@ -186,39 +221,3 @@ function Content() {
 }
 
 export default Content;
-
-// {/* <div className="flex flex-col md:flex-row gap-6 p-6">
-//   {/* ฝั่งซ้าย: แสดงข้อมูลทีมที่เลือก */}
-//   <div className="flex-1 bg-gray-900 text-white p-6 rounded-lg shadow-lg">
-//     {selectedTeam ? (
-//       <>
-//         <h2 className="text-2xl font-bold mb-4">{selectedTeam.name}</h2>
-//         <ul className="space-y-2">
-//           {selectedTeam.members.map((member, index) => (
-//             <li key={index} className="bg-gray-800 px-4 py-2 rounded-md">
-//               {member}
-//             </li>
-//           ))}
-//         </ul>
-//       </>
-//     ) : (
-//       <p className="text-gray-400">เลือกทีมจากด้านขวาเพื่อดูสมาชิก</p>
-//     )}
-//   </div>
-
-//   {/* ฝั่งขวา: รายชื่อทีม */}
-//   <div className="w-full md:w-[300px] bg-black/80 p-4 rounded-lg shadow-[0_0_20px_rgba(255,0,0,0.4)]">
-//     <h3 className="text-xl text-white font-semibold mb-4">Teams</h3>
-//     <ul className="space-y-3">
-//       {teams.map((team, index) => (
-//         <li
-//           key={index}
-//           onClick={() => setSelectedTeam(team)}
-//           className="cursor-pointer bg-red-700 hover:bg-red-600 text-white px-4 py-2 rounded-md transition-all duration-200 shadow-md"
-//         >
-//           {team.name}
-//         </li>
-//       ))}
-//     </ul>
-//   </div>
-// </div> */}

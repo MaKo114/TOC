@@ -18,7 +18,7 @@ def get_europe_team_info(base_url='https://www.vlr.gg'):
     league_pattern = r'<a href="(/rankings/[a-z\-]+)"'
     league_paths = list(set(re.findall(league_pattern, html_main, re.IGNORECASE)))
     europe_leagues = [path for path in league_paths if any(k in path.lower() for k in ['europe', 'emea', 'eu'])]
-
+  
     team_pattern = r'<a href="(/team/\d+/[^"]+)"[^>]*>[\s\S]*?<img[^>]+src="([^"]+)"[^>]*>[\s\S]*?<div[^>]*class="ge-text">([\s\S]*?)</div>'
     team_data = []
 
@@ -29,7 +29,12 @@ def get_europe_team_info(base_url='https://www.vlr.gg'):
         for href, logo_src, name in teams:
             clean_name = re.sub(r'<[^>]+>', '', name)
             clean_name = re.sub(r'\s+', ' ', clean_name).strip()
-            clean_name = re.sub(r'\s+#\w+\s+[A-Za-z]+$', '', clean_name)
+
+            # ลบ hash tag เช่น #B1M6
+            clean_name = re.sub(r'#\w+', '', clean_name)
+
+            # ลบชื่อประเทศที่อาจติดมา
+            clean_name = re.sub(r'\b[A-Z][a-z]+(?: [A-Z][a-z]+)*$', '', clean_name).strip()
             if logo_src == '/img/vlr/tmp/vlr.png':
                 logo_src = '//www.vlr.gg' + logo_src
             
@@ -45,6 +50,11 @@ def get_europe_team_info(base_url='https://www.vlr.gg'):
 
 # def get_team_players(team):
 def get_team_players(team):
+    
+    cache_key = f"players:{team.lower()}"
+    if cache_key in _cache:
+        return _cache[cache_key]
+    
     data = get_europe_team_info()
     
     def classify_type(roles):
@@ -85,13 +95,17 @@ def get_team_players(team):
                     "flag": flag,
                     "path": path
                 })
-
+            _cache[cache_key] = roster
             return roster
 
 
 
 
 def player_detail(team, name):
+    cache_key = f"detail:{team.lower()}:{name.lower()}"
+    if cache_key in _cache:
+        return _cache[cache_key]
+
     base_url = 'https://www.vlr.gg'
     members = get_team_players(team)
     if members:
@@ -131,7 +145,7 @@ def player_detail(team, name):
                     r'<div[^>]*class="wf-avatar mod-player"[^>]*>[\s\S]*?<img[^>]+src="([^"]+)"', html.text)
                 img_url = 'https:' + img_match.group(1) if img_match else None
 
-                return {
+                result =  {
                     "alias": alias,
                     "real_name": real_name,
                     "image": img_url,
@@ -142,54 +156,108 @@ def player_detail(team, name):
                     },
                     "href": link 
                 }
+                _cache[cache_key] = result
+                return result
 
     return 'not found'
 
+
 def extract_match_cards(team, name, limit=5):
+    cache_key = f"match_cards:{team.lower()}:{name.lower()}"
+    if cache_key in _cache:
+        return _cache[cache_key]
+
     player = player_detail(team, name)
     html = requests.get(player['href'])
-    cards = re.findall(r'<a href="(/[^"]+)"[^>]*class="wf-card[^"]*">([\s\S]*?)</a>', html.text)
+    html_text = html.text.replace("&sdot;", "⋅")
+
+    cards = re.findall(r'<a href="(/[^"]+)"[^>]*class="[^"]*wf-card[^"]*"[^>]*>([\s\S]*?)</a>', html_text)
+
+    def extract_event_stage(block):
+        pattern = re.compile(
+            r'<div class="m-item-event[^>]*>[\s\S]*?<div[^>]*class="text-of"[^>]*>\s*(.*?)\s*</div>\s*([\w\s]+)\s*[⋅]\s*(\w+)',
+            re.DOTALL
+        )
+        match = pattern.search(block)
+        if match:
+            return match.group(1).strip(), f"{match.group(2).strip()} ⋅ {match.group(3).strip()}"
+        return None, None
+
+    def clean_logo(src):
+        if not src:
+            return "https://www.vlr.gg/img/vlr/tmp/vlr.png"
+        if "vlr/tmp/vlr.png" in src:
+            return "https://www.vlr.gg/img/vlr/tmp/vlr.png"
+        if src.startswith("http"):
+            return src
+        if src.startswith("//"):
+            return "https:" + src
+        return "https://www.vlr.gg" + src
+
+    def extract_logos_and_thumb(block):
+        logo_urls = re.findall(
+            r'<div[^>]*class="m-item-logo(?: mod-right)?[^"]*"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"',
+            block
+        )
+        thumb_match = re.search(
+            r'<div[^>]*class="fc-flex m-item-thumb[^"]*"[^>]*>\s*<img[^>]*src="([^"]+)"',
+            block
+        )
+        event_thumb_raw = thumb_match.group(1).strip() if thumb_match else None
+        event_thumb = clean_logo(event_thumb_raw) if event_thumb_raw else None
+
+        team_1_logo = clean_logo(logo_urls[0]) if len(logo_urls) > 0 else event_thumb or clean_logo(None)
+        team_2_logo = clean_logo(logo_urls[1]) if len(logo_urls) > 1 else clean_logo(None)
+
+        return team_1_logo, team_2_logo, event_thumb
+
     results = []
 
     for url, block in cards[:limit]:
-        event = re.search(r'<div[^>]*font-weight:\s*700[^>]*class="text-of">\s*(.*?)\s*</div>', block)
-        match = re.search(r'Group Stage\s*(?:⋅|&sdot;)\s*(W\d+)', block, re.DOTALL)
+        event_name, stage_name = extract_event_stage(block)
 
         team_names = re.findall(r'<span[^>]*class="m-item-team-name"[^>]*>\s*(.*?)\s*</span>', block)
         team_1 = team_names[0].strip() if len(team_names) > 0 else None
         team_2 = team_names[1].strip() if len(team_names) > 1 else None
-        score = re.search(r'<div class="m-item-result[^>]*">[\s\S]*?<span>(\d+)</span>[\s\S]*?<span>(\d+)</span>', block)
-        logo_1 = re.search(r'<div class="m-item-logo">[\s\S]*?<img src="(//[^"]+)"', block)
-        logo_2 = re.search(r'<div class="m-item-logo mod-right">[\s\S]*?<img src="(//[^"]+)"', block)
-        date = re.search(r'<div class="m-item-date">[\s\S]*?<div>\s*(.*?)\s*</div>\s*(.*?)\s*</div>', block)
+
+        score = re.search(
+            r'<div class="m-item-result[^>]*">[\s\S]*?<span>(\d+)</span>[\s\S]*?<span>(\d+)</span>',
+            block
+        )
+
+        team_1_logo, team_2_logo, event_thumb = extract_logos_and_thumb(block)
+
+        date = re.search(
+            r'<div class="m-item-date">[\s\S]*?<div>\s*(.*?)\s*</div>\s*(.*?)\s*</div>',
+            block
+        )
 
         results.append({
             "match_url": "https://www.vlr.gg" + url,
-            "event": event.group(1).strip() if event else None,
-            "stage": match.group(1) if match else None,
+            "event": event_name,
+            "stage": stage_name,
             "team_1": team_1,
             "team_2": team_2,
             "score": f"{score.group(1)} : {score.group(2)}" if score else None,
-            "team_1_logo": "https:" + logo_1.group(1) if logo_1 else None,
-            "team_2_logo": "https:" + logo_2.group(1) if logo_2 else None,
+            "team_1_logo": team_1_logo,
+            "team_2_logo": team_2_logo,
+            "event_thumb": event_thumb,
             "date": date.group(1).strip() if date else None,
             "time": date.group(2).strip() if date else None
         })
 
+    _cache[cache_key] = results
     return results
+
  
 def extract_all_team_info(team, name):
+    cache_key = f"team_history:{team.lower()}:{name.lower()}"
+    if cache_key in _cache:
+        return _cache[cache_key]
+
     player = player_detail(team, name)
     html = requests.get(player['href']).text
     base_url = 'https://www.vlr.gg'
-
-    team_block_pattern = re.compile(
-        r'<a[^>]*href="(?P<href>/team/\d+/[^"]+)"[^>]*>[\s\S]*?'
-        r'<img[^>]+src="(?P<img>[^"]+)"[^>]*>[\s\S]*?'
-        r'<div[^>]*font-weight[^>]*>\s*(?P<name>.*?)\s*</div>[\s\S]*?'
-        r'<div[^>]*class="ge-text-light"[^>]*>\s*(?P<status>(joined|left) in.*?)\s*</div>',
-        re.IGNORECASE
-    )
 
     def normalize_logo_src(src):
         src = src.strip()
@@ -202,36 +270,92 @@ def extract_all_team_info(team, name):
         else:
             return base_url + '/' + src
 
+    block_pattern = re.compile(r'<a[^>]*href="/team/\d+/[^"]+"[^>]*>[\s\S]*?</a>', re.IGNORECASE)
+    blocks = block_pattern.findall(html)
+
+    team_infos = []
+
+    for block in blocks:
+        href_match = re.search(r'href="(/team/\d+/[^"]+)"', block)
+        href = base_url + href_match.group(1) if href_match else None
+
+        logo_match = re.search(r'<img[^>]+src="([^"]+)"', block)
+        logo = normalize_logo_src(logo_match.group(1)) if logo_match else None
+
+        name_match = re.search(r'<div[^>]*font-weight[^>]*>\s*(.*?)\s*</div>', block)
+        team_name = name_match.group(1).strip() if name_match else None
+
+        status_blocks = re.findall(r'<div[^>]*class="ge-text-light"[^>]*>\s*(.*?)\s*</div>', block)
+        status_blocks = [s.strip() for s in status_blocks if s.strip()]
+
+        role_match = re.search(r'<span[^>]*class="wf-tag[^"]*"[^>]*>\s*(.*?)\s*</span>', block)
+        role = role_match.group(1).strip() if role_match else None
+
+        joined = None
+        left = None
+        inactive = None
+        period = None
+
+        for s in status_blocks:
+            s_lower = s.lower()
+            if "joined in" in s_lower:
+                joined = s.replace("joined in", "").strip()
+            elif "left in" in s_lower:
+                left = s.replace("left in", "").strip()
+            elif "inactive from" in s_lower:
+                inactive = s.replace("inactive from", "").strip()
+            elif re.match(r"\w+ \d{4} – \w+ \d{4}", s):
+                period = re.sub(r"\s*–\s*", "–", s.strip())
+
+        team_infos.append({
+            "name": team_name,
+            "logo": logo,
+            "href": href,
+            "role": role,
+            "joined": joined,
+            "left": left,
+            "period": period,
+            "inactive": inactive
+        })
+
+    def is_current(info):
+        if info["period"]:
+            left_date = info["period"].split("–")[-1].strip().lower()
+            return "present" in left_date or left_date == ""
+        return info["left"] is None
+
     current_team = None
     past_teams = []
 
-    for m in team_block_pattern.finditer(html):
-        name = m.group("name").strip()
-        href = base_url + m.group("href")
-        logo = normalize_logo_src(m.group("img"))
-        status = m.group("status").strip()
+    for info in team_infos:
+        joined_date = info.get("joined")
+        left_date = info.get("left")
 
-        if status.lower().startswith("joined in"):
-            current_team = {
-                "name": name,
-                "joined": status.replace("joined in", "").strip(),
-                "logo": logo,
-                "href": href
-            }
-        elif status.lower().startswith("left in"):
-            past_teams.append({
-                "name": name,
-                "left": status.replace("left in", "").strip(),
-                "logo": logo,
-                "href": href
-            })
+        if info["period"]:
+            joined_date, left_date = [p.strip() for p in info["period"].split("–")]
 
-    return {
+        team_entry = {
+            "name": info["name"],
+            "joined": joined_date,
+            "left": left_date,
+            "logo": info["logo"],
+            "href": info["href"],
+            "role": info.get("role"),
+            "inactive": info.get("inactive")
+        }
+
+        if is_current(info) and current_team is None:
+            current_team = team_entry
+        else:
+            past_teams.append(team_entry)
+
+    result = {
         "current_team": current_team,
         "past_teams": past_teams
     }
-    
-    
+    _cache[cache_key] = result
+    return result
+        
 def export_team_names_to_csv(filename="team_names.csv"):
     team_names = get_europe_team_info()
     with open(filename, mode="w", newline="", encoding="utf-8") as file:
@@ -240,3 +364,12 @@ def export_team_names_to_csv(filename="team_names.csv"):
         for name in team_names:
             writer.writerow([name])
     print(f"บันทึกชื่อทีมทั้งหมดลงไฟล์ {filename} แล้ว")
+
+
+# teams = get_europe_team_info()
+
+# input = input('search... : ')
+# team = [ e for e in teams if input.lower() in e['name'].lower()]
+
+# for i in team:
+#     print(i)
