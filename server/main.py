@@ -30,16 +30,16 @@ def fetch_players(team: str):
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
 
-@app.get('/team/player-info/')
-def player_info(team: str, name: str):
-    try:
-        detail = player_detail(team, name)
-        matches = extract_match_cards(team, name)
-        recent_team = extract_all_team_info(team, name)
-        return {
-            "detail": detail,
-            "matches": matches,
-            "recent_team": recent_team
-        }
-    except Exception as e:
-
+# @app.get('/team/player-info/')
+# def player_info(team: str, name: str):
+#     try:
+#         detail = player_detail(team, name)
+#         matches = extract_match_cards(team, name)
+#         recent_team = extract_all_team_info(team, name)
+#         return {
+#             "detail": detail,
+#             "matches": matches,
+#             "recent_team": recent_team
+#         }
+#     except Exception as e:
+#         return e
