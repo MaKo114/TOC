@@ -37,6 +37,7 @@ def fetch_players(team: str):
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
 
+
 @app.get('/team/player-info/')
 def player_info(team: str, name: str):
     try:
@@ -66,3 +67,4 @@ def download_team_names():
         )
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
+

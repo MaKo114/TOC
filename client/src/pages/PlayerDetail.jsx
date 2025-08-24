@@ -1,4 +1,5 @@
 import { useParams } from "react-router-dom";
+import Flag from "react-world-flags";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 
@@ -10,7 +11,7 @@ const PlayerDetail = () => {
     const fetchPlayer = async () => {
       try {
         const res = await axios.get(
-          `https://toc-backend-78wq.onrender.com/team/player-info/?team=${team}&name=${name}`
+          `http://127.0.0.1:8000/team/player-info/?team=${team}&name=${name}`
         );
         setPlayerDetail(res.data);
       } catch (err) {
@@ -26,27 +27,47 @@ const PlayerDetail = () => {
       <h1 className="text-3xl font-bold mb-4">Player Detail</h1>
 
       {playerDetail?.detail ? (
-        <div className="mb-6">
-          <p>ชื่อจริง: {playerDetail.detail.real_name || "ไม่ระบุ"}</p>
-          <p>Alias: {playerDetail.detail.alias || "ไม่ระบุ"}</p>
-          <p>Team Param: {team}</p>
-          <p>Country: {playerDetail.detail.country?.name || "Unknown"}</p>
-          <div className="flex gap-4 mt-2">
-            {playerDetail.detail.social?.length ? (
-              playerDetail.detail.social.map((link, i) => (
-                <a
-                  key={i}
-                  href={link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-400 underline"
-                >
-                  {link.includes("twitch") ? "Twitch" : "Twitter"}
-                </a>
-              ))
-            ) : (
-              <p className="text-gray-400">No social links</p>
-            )}
+        <div className="flex flex-col gap-5 sm:flex-row items-center bg-[#E7E6E3] rounded-lg shadow-md hover:shadow-lg transition-all duration-300 p-4 w-full">
+          <img
+            src={playerDetail.detail.image}
+            className="h-50 w-50 object-cover rounded-xl border-2 border-white"
+            alt={playerDetail.detail.alias}
+          />
+
+          <div className="px-4 w-full">
+            <div className="flex items-center gap-5 text-2xl font-semibold text-gray-600">
+              <p>
+                {playerDetail.detail.alias || "ไม่ระบุ"} (
+                {playerDetail.detail.real_name || "ไม่ระบุ"})
+              </p>
+            </div>
+            <div className="text-gray-600">
+              {playerDetail.detail.social?.length ? (
+                playerDetail.detail.social.map((link, i) => (
+                  <div>
+                    <a
+                      key={i}
+                      href={link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-400 underline"
+                    >
+                      {link.includes("twitch") ? `${link}` : `${link}`}
+                    </a>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-400">No social links</p>
+              )}
+            </div>
+              <div className="flex items-center gap-5 text-lg font-semibold text-gray-600">
+                <Flag
+                code={playerDetail.detail.country?.code}
+                className="w-8 h-8"
+              ></Flag>
+                {playerDetail.detail.country?.name || "Unknown"}
+              </div>
+              
           </div>
         </div>
       ) : (
