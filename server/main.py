@@ -7,13 +7,16 @@ from controller import *
 
 app = FastAPI()
 
+app = FastAPI()
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://toc-1-t7dt.onrender.com"],
-    allow_credentials=True,
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
 
 @app.get("/teams")
 def fetch_all_data(query: str = None):
