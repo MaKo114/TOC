@@ -4,6 +4,7 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 
 function Content({ searchTerm }) {
+  
   const [allTeams, setAllTeams] = useState([]); // ข้อมูลทั้งหมด
   const [filteredTeams, setFilteredTeams] = useState([]); // ข้อมูลที่กรองแล้ว
 
@@ -18,7 +19,7 @@ function Content({ searchTerm }) {
     localStorage.setItem("selectedTeam", value);
     try {
       const res = await axios.get(
-        `http://127.0.0.1:8000/team/players/${value}`
+        `${import.meta.env.VITE_BASE_URL}/team/players/${value}`
       );
       setTeam(res.data);
     } catch (err) {
@@ -30,7 +31,7 @@ function Content({ searchTerm }) {
   const handlefetch = async (initialTeam) => {
     try {
       const res = await axios.get(
-        `http://127.0.0.1:8000/teams`
+        `${import.meta.env.VITE_BASE_URL}/teams`
       );
       const teams = Array.isArray(res.data) ? res.data : [];
       setAllTeams(teams);
@@ -40,7 +41,7 @@ function Content({ searchTerm }) {
       if (teamToLoad) {
         setSelectedTeam(teamToLoad);
         const teamRes = await axios.get(
-          `http://127.0.0.1:8000/team/players/${teamToLoad}`
+          `${import.meta.env.VITE_BASE_URL}/players/${teamToLoad}`
         );
         setTeam(teamRes.data);
       }

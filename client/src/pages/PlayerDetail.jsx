@@ -11,7 +11,7 @@ const PlayerDetail = () => {
     const fetchPlayer = async () => {
       try {
         const res = await axios.get(
-          `http://127.0.0.1:8000/team/player-info/?team=${team}&name=${name}`
+          `${import.meta.env.VITE_BASE_URL}/player-info/?team=${team}&name=${name}`
         );
         setPlayerDetail(res.data);
       } catch (err) {
