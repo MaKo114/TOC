@@ -1,13 +1,12 @@
 // rfce
 import React from "react";
-import { House } from "lucide-react";
 import "./Body.css";
 import axios from "axios";
 
 function Nav({ searchTerm, setSearchTerm }) {
-  const BASE_URL = import.meta.env.VITE_BASE_URL;
+
   const csvButton = async () => {
-    const res = await axios.get(`${BASE_URL}/download/team-names`, {
+    const res = await axios.get(`https://toc-backend-78wq.onrender.com/download/team-names`, {
       responseType: "blob",
     });
 
@@ -102,7 +101,7 @@ function Nav({ searchTerm, setSearchTerm }) {
             loop
             className="absolute top-0 left-0 w-full h-full object-cover z-0"
           >
-            <source src="../../public/newx.mp4" type="video/mp4" />
+            <source src="/newx.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
         </div>
