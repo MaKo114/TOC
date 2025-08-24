@@ -1,12 +1,13 @@
 // rfce
-import React, { useState } from "react";
+import React from "react";
 import { House } from "lucide-react";
 import "./Body.css";
 import axios from "axios";
 
-function Nav() {
+function Nav({ searchTerm, setSearchTerm }) {
+  const BASE_URL = import.meta.env.VITE_BASE_URL;
   const csvButton = async () => {
-    const res = await axios.get("http://127.0.0.1:8000/download/team-names", {
+    const res = await axios.get(`${BASE_URL}/download/team-names`, {
       responseType: "blob",
     });
 
@@ -51,8 +52,10 @@ function Nav() {
                   </svg>
                 </div>
                 <input
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   type="text"
-                  placeholder="Search..."
+                  placeholder="ค้นหาทีม"
                   className="w-full max-w-[500px] p-5 ps-14 text-xl text-white bg-black/40 border border-white/30 rounded-2xl shadow-[0_0_20px_rgba(0,255,255,0.6)] backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all duration-300"
                 />
               </div>

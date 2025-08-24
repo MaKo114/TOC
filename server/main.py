@@ -16,12 +16,15 @@ app.add_middleware(
 )
 
 @app.get("/teams")
-def fetch_all_data():
+def fetch_all_data(query: str = None):
     try:
         data = get_europe_team_info()
+        if query:
+            team = [ e for e in data if query.lower() in e['name'].lower()]
+            return team
         return data
-    except Exception as e:
-        return JSONResponse(status_code=500, content={"error": str(e)})
+    except Exception as err:
+        return JSONResponse(status_code=500, content={"error": str(err)})
 
 @app.get('/team/players/{team}')
 def fetch_players(team: str):

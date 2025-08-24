@@ -3,9 +3,12 @@ import Flag from "react-world-flags";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
-function Content() {
+function Content({ searchTerm }) {
+
   const BASE_URL = import.meta.env.VITE_BASE_URL;
-  const [fetch, setFetch] = useState();
+  const [allTeams, setAllTeams] = useState([]); // ข้อมูลทั้งหมด
+  const [filteredTeams, setFilteredTeams] = useState([]); // ข้อมูลที่กรองแล้ว
+
   const [team, setTeam] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTeam, setSelectedTeam] = useState(null);
@@ -16,9 +19,7 @@ function Content() {
     setSelectedTeam(value);
     localStorage.setItem("selectedTeam", value);
     try {
-      const res = await axios.get(
-        `${BASE_URL}/team/players/${value}`
-      );
+      const res = await axios.get(`${BASE_URL}/team/players/${value}`);
       setTeam(res.data);
     } catch (err) {
       console.log(err);
@@ -29,9 +30,11 @@ function Content() {
   const handlefetch = async (initialTeam) => {
     try {
       const res = await axios.get(`${BASE_URL}/teams`);
-      setFetch(res.data);
+      const teams = Array.isArray(res.data) ? res.data : [];
+      setAllTeams(teams);
+      setFilteredTeams(teams); // เริ่มต้นแสดงทั้งหมด
 
-      const teamToLoad = initialTeam || res.data[0]?.name;
+      const teamToLoad = initialTeam || teams[0]?.name;
       if (teamToLoad) {
         setSelectedTeam(teamToLoad);
         const teamRes = await axios.get(
@@ -50,12 +53,16 @@ function Content() {
     const savedTeam = localStorage.getItem("selectedTeam");
     handlefetch(savedTeam);
   }, []);
-
   useEffect(() => {
-    if (fetch && fetch.length > 0 && !selectedTeam) {
-      handleTeam(fetch[0].name);
+    if (searchTerm.trim() === "") {
+      setFilteredTeams(allTeams);
+    } else {
+      const filtered = allTeams.filter((team) =>
+        team.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredTeams(filtered);
     }
-  }, [fetch]);
+  }, [searchTerm, allTeams]);
   return (
     <div className="px-8 mt-5 flex flex-col md:flex-row w-full gap-5 mb-10">
       {/* ฝั่งซ้าย 30% (หรือ 100% บนมือถือ) */}
@@ -76,8 +83,8 @@ function Content() {
         </div>
 
         <div className="flex flex-col gap-4 px-5 pb-5 text-black text-xl ">
-          {fetch &&
-            fetch.map((item, index) => {
+          {filteredTeams &&
+            filteredTeams.map((item, index) => {
               const isSelected = selectedTeam === item.name;
               return (
                 <button
@@ -212,39 +219,3 @@ function Content() {
 }
 
 export default Content;
-
-// {/* <div className="flex flex-col md:flex-row gap-6 p-6">
-//   {/* ฝั่งซ้าย: แสดงข้อมูลทีมที่เลือก */}
-//   <div className="flex-1 bg-gray-900 text-white p-6 rounded-lg shadow-lg">
-//     {selectedTeam ? (
-//       <>
-//         <h2 className="text-2xl font-bold mb-4">{selectedTeam.name}</h2>
-//         <ul className="space-y-2">
-//           {selectedTeam.members.map((member, index) => (
-//             <li key={index} className="bg-gray-800 px-4 py-2 rounded-md">
-//               {member}
-//             </li>
-//           ))}
-//         </ul>
-//       </>
-//     ) : (
-//       <p className="text-gray-400">เลือกทีมจากด้านขวาเพื่อดูสมาชิก</p>
-//     )}
-//   </div>
-
-//   {/* ฝั่งขวา: รายชื่อทีม */}
-//   <div className="w-full md:w-[300px] bg-black/80 p-4 rounded-lg shadow-[0_0_20px_rgba(255,0,0,0.4)]">
-//     <h3 className="text-xl text-white font-semibold mb-4">Teams</h3>
-//     <ul className="space-y-3">
-//       {teams.map((team, index) => (
-//         <li
-//           key={index}
-//           onClick={() => setSelectedTeam(team)}
-//           className="cursor-pointer bg-red-700 hover:bg-red-600 text-white px-4 py-2 rounded-md transition-all duration-200 shadow-md"
-//         >
-//           {team.name}
-//         </li>
-//       ))}
-//     </ul>
-//   </div>
-// </div> */}
