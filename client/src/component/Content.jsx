@@ -18,7 +18,7 @@ function Content({ searchTerm }) {
     localStorage.setItem("selectedTeam", value);
     try {
       const res = await axios.get(
-        `https://toc-backend-78wq.onrender.com/team/players/${value}`
+        `http://127.0.0.1:8000/team/players/${value}`
       );
       setTeam(res.data);
     } catch (err) {
@@ -30,7 +30,7 @@ function Content({ searchTerm }) {
   const handlefetch = async (initialTeam) => {
     try {
       const res = await axios.get(
-        `https://toc-backend-78wq.onrender.com/teams`
+        `http://127.0.0.1:8000/teams`
       );
       const teams = Array.isArray(res.data) ? res.data : [];
       setAllTeams(teams);
@@ -40,7 +40,7 @@ function Content({ searchTerm }) {
       if (teamToLoad) {
         setSelectedTeam(teamToLoad);
         const teamRes = await axios.get(
-          `https://toc-backend-78wq.onrender.com/team/players/${teamToLoad}`
+          `http://127.0.0.1:8000/team/players/${teamToLoad}`
         );
         setTeam(teamRes.data);
       }
@@ -205,7 +205,7 @@ function Content({ searchTerm }) {
                       className="h-20 w-20 object-cover rounded-full border-2 border-white"
                       alt={profile.alias}
                     />
-                    <div className="px-4">
+                    <div className="px-4 w-full max-w-[180px] overflow-hidden text-ellipsis whitespace-nowrap">
                       <div className="flex items-center gap-5 text-lg font-semibold text-black">
                         <Flag code={profile.flag} className="w-8 h-8"></Flag>
                         {profile.alias}
