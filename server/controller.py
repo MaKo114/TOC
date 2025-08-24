@@ -364,3 +364,12 @@ def export_team_names_to_csv(filename="team_names.csv"):
         for name in team_names:
             writer.writerow([name])
     print(f"บันทึกชื่อทีมทั้งหมดลงไฟล์ {filename} แล้ว")
+
+
+# teams = get_europe_team_info()
+
+# input = input('search... : ')
+# team = [ e for e in teams if input.lower() in e['name'].lower()]
+
+# for i in team:
+#     print(i)
