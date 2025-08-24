@@ -18,7 +18,7 @@ function Content({ searchTerm }) {
     setSelectedTeam(value);
     localStorage.setItem("selectedTeam", value);
     try {
-      const res = await axios.get(`https://toc-5ral.onrender.com/team/players/${value}`);
+      const res = await axios.get(`https://toc-backend-78wq.onrender.com/team/players/${value}`);
       setTeam(res.data);
     } catch (err) {
       console.log(err);
@@ -28,7 +28,7 @@ function Content({ searchTerm }) {
   };
   const handlefetch = async (initialTeam) => {
     try {
-      const res = await axios.get(`https://toc-5ral.onrender.com/teams`);
+      const res = await axios.get(`https://toc-backend-78wq.onrender.com/teams`);
       const teams = Array.isArray(res.data) ? res.data : [];
       setAllTeams(teams);
       setFilteredTeams(teams); // เริ่มต้นแสดงทั้งหมด
@@ -37,7 +37,7 @@ function Content({ searchTerm }) {
       if (teamToLoad) {
         setSelectedTeam(teamToLoad);
         const teamRes = await axios.get(
-          `https://toc-5ral.onrender.com/team/players/${teamToLoad}`
+          `https://toc-backend-78wq.onrender.com/team/players/${teamToLoad}`
         );
         setTeam(teamRes.data);
       }
