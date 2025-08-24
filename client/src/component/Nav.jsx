@@ -1,10 +1,10 @@
 // rfce
 import React from "react";
-import { House } from "lucide-react";
 import "./Body.css";
 import axios from "axios";
 
 function Nav({ searchTerm, setSearchTerm }) {
+
   const BASE_URL = import.meta.env.VITE_BASE_URL;
   const csvButton = async () => {
     const res = await axios.get(`${BASE_URL}/download/team-names`, {
