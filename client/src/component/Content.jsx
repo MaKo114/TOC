@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 
 function Content({ searchTerm }) {
 
-  const BASE_URL = import.meta.env.VITE_BASE_URL;
   const [allTeams, setAllTeams] = useState([]); // ข้อมูลทั้งหมด
   const [filteredTeams, setFilteredTeams] = useState([]); // ข้อมูลที่กรองแล้ว
 
@@ -19,7 +18,7 @@ function Content({ searchTerm }) {
     setSelectedTeam(value);
     localStorage.setItem("selectedTeam", value);
     try {
-      const res = await axios.get(`${BASE_URL}/team/players/${value}`);
+      const res = await axios.get(`https://toc-5ral.onrender.com/team/players/${value}`);
       setTeam(res.data);
     } catch (err) {
       console.log(err);
@@ -29,7 +28,7 @@ function Content({ searchTerm }) {
   };
   const handlefetch = async (initialTeam) => {
     try {
-      const res = await axios.get(`${BASE_URL}/teams`);
+      const res = await axios.get(`https://toc-5ral.onrender.com/teams`);
       const teams = Array.isArray(res.data) ? res.data : [];
       setAllTeams(teams);
       setFilteredTeams(teams); // เริ่มต้นแสดงทั้งหมด
@@ -38,7 +37,7 @@ function Content({ searchTerm }) {
       if (teamToLoad) {
         setSelectedTeam(teamToLoad);
         const teamRes = await axios.get(
-          `${BASE_URL}/team/players/${teamToLoad}`
+          `https://toc-5ral.onrender.com/team/players/${teamToLoad}`
         );
         setTeam(teamRes.data);
       }

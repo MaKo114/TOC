@@ -5,9 +5,8 @@ import axios from "axios";
 
 function Nav({ searchTerm, setSearchTerm }) {
 
-  const BASE_URL = import.meta.env.VITE_BASE_URL;
   const csvButton = async () => {
-    const res = await axios.get(`${BASE_URL}/download/team-names`, {
+    const res = await axios.get(`https://toc-5ral.onrender.com/download/team-names`, {
       responseType: "blob",
     });
 
