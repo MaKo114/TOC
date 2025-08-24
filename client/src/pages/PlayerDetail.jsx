@@ -3,7 +3,6 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 
 const PlayerDetail = () => {
-  const BASE_URL = import.meta.env.VITE_BASE_URL;
   const { team, name } = useParams();
   const [playerDetail, setPlayerDetail] = useState(null);
 
@@ -11,7 +10,7 @@ const PlayerDetail = () => {
     const fetchPlayer = async () => {
       try {
         const res = await axios.get(
-          `${BASE_URL}/team/player-info/?team=${team}&name=${name}`
+          `https://toc-5ral.onrender.com/team/player-info/?team=${team}&name=${name}`
         );
         setPlayerDetail(res.data);
       } catch (err) {
@@ -26,31 +25,33 @@ const PlayerDetail = () => {
     <div className="text-white px-4 py-6">
       <h1 className="text-3xl font-bold mb-4">Player Detail</h1>
 
-      {playerDetail ? (
+      {playerDetail?.detail ? (
         <div className="mb-6">
-          <p>ชื่อจริง: {playerDetail.detail.real_name}</p>
-          <p>Alias: {playerDetail.detail.alias}</p>
+          <p>ชื่อจริง: {playerDetail.detail.real_name || "ไม่ระบุ"}</p>
+          <p>Alias: {playerDetail.detail.alias || "ไม่ระบุ"}</p>
           <p>Team Param: {team}</p>
-          <p>Country: {playerDetail.detail.country?.name}</p>
+          <p>Country: {playerDetail.detail.country?.name || "Unknown"}</p>
           <div className="flex gap-4 mt-2">
-            {playerDetail.detail.social?.map((link, i) => (
-              <a
-                key={i}
-                href={link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-400 underline"
-              >
-                {link.includes("twitch") ? "Twitch" : "Twitter"}
-              </a>
-            ))}
+            {playerDetail.detail.social?.length ? (
+              playerDetail.detail.social.map((link, i) => (
+                <a
+                  key={i}
+                  href={link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 underline"
+                >
+                  {link.includes("twitch") ? "Twitch" : "Twitter"}
+                </a>
+              ))
+            ) : (
+              <p className="text-gray-400">No social links</p>
+            )}
           </div>
         </div>
       ) : (
         <p>Loading player info...</p>
       )}
-
-        
 
       <h2 className="text-2xl font-bold mb-4">Recent Matches</h2>
       <div>

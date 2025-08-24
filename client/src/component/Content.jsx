@@ -4,7 +4,6 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 
 function Content({ searchTerm }) {
-
   const [allTeams, setAllTeams] = useState([]); // ข้อมูลทั้งหมด
   const [filteredTeams, setFilteredTeams] = useState([]); // ข้อมูลที่กรองแล้ว
 
@@ -18,7 +17,9 @@ function Content({ searchTerm }) {
     setSelectedTeam(value);
     localStorage.setItem("selectedTeam", value);
     try {
-      const res = await axios.get(`https://toc-backend-78wq.onrender.com/team/players/${value}`);
+      const res = await axios.get(
+        `https://toc-backend-78wq.onrender.com/team/players/${value}`
+      );
       setTeam(res.data);
     } catch (err) {
       console.log(err);
@@ -28,7 +29,9 @@ function Content({ searchTerm }) {
   };
   const handlefetch = async (initialTeam) => {
     try {
-      const res = await axios.get(`https://toc-backend-78wq.onrender.com/teams`);
+      const res = await axios.get(
+        `https://toc-backend-78wq.onrender.com/teams`
+      );
       const teams = Array.isArray(res.data) ? res.data : [];
       setAllTeams(teams);
       setFilteredTeams(teams); // เริ่มต้นแสดงทั้งหมด
@@ -140,7 +143,7 @@ function Content({ searchTerm }) {
                 </div>
               ))
             : team
-                .filter((profile) => profile.type === "player")
+                .filter((profile) => profile.type === "player" && profile.alias)
                 .map((profile, index) => (
                   <Link
                     to={`/player-detail/${selectedTeam}/${profile.alias}`}
@@ -190,7 +193,7 @@ function Content({ searchTerm }) {
                 </div>
               ))
             : team
-                .filter((profile) => profile.type === "staff")
+                .filter((profile) => profile.type === "staff" && profile.alias)
                 .map((profile, index) => (
                   <Link
                     to={`/player-detail/${selectedTeam}/${profile.alias}`}
