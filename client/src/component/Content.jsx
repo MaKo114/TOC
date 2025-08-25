@@ -30,9 +30,11 @@ function Content({ searchTerm }) {
   };
   const handlefetch = async (initialTeam) => {
     try {
+
       const res = await axios.get(
         `${import.meta.env.VITE_BASE_URL}/teams`
       );
+
       const teams = Array.isArray(res.data) ? res.data : [];
       setAllTeams(teams);
       setFilteredTeams(teams); // เริ่มต้นแสดงทั้งหมด
@@ -75,14 +77,14 @@ function Content({ searchTerm }) {
         style={{ boxShadow: "0 0 8px rgba(255, 255, 255, 0.4)" }}
       >
         <div
-          className="text-white text-3xl font-bold px-4 py-2 mt-5 mb-5 inline-block"
+          className="text-white text-3xl font-bold px-4 py-2 mt-5 mb-5 pr-8 inline-block"
           style={{
             background: "linear-gradient(135deg, #ff0000, #b30000)",
             clipPath: "polygon(0 0, 100% 10%, 90% 100%, 0% 90%)",
             boxShadow: "0 0 10px rgba(255, 0, 0, 0.6)",
           }}
         >
-          Teams
+          Valorant Team Rankings
         </div>
 
         <div className="flex flex-col gap-4 px-5 pb-5 text-black text-xl ">
@@ -105,7 +107,15 @@ function Content({ searchTerm }) {
                     src={item.logo}
                     alt={item.name}
                   />
-                  <div>{item.name}</div>
+                  <div>
+                    <div className="flex justify-center items-center gap-2">{item.name}  <div className="text-sm text-gray-500">#AFP</div></div> 
+                    <div className="text-start text-gray-600">Europe</div>
+                  </div>
+
+                  <div className="ml-auto text-right mr-4">
+                    <div className="text-center">#{index + 1}</div>
+                    <div>2000</div>
+                  </div>
                 </button>
               );
             })}
