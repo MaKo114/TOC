@@ -193,14 +193,20 @@ def extract_match_cards(team, name, limit=5):
     cards = re.findall(r'<a href="(/[^"]+)"[^>]*class="[^"]*wf-card[^"]*"[^>]*>([\s\S]*?)</a>', html_text)
 
     def extract_event_stage(block):
+        # ปรับ pattern ให้ยืดหยุ่นขึ้น
         pattern = re.compile(
-            r'<div class="m-item-event[^>]*>[\s\S]*?<div[^>]*class="text-of"[^>]*>\s*(.*?)\s*</div>\s*([\w\s]+)\s*[⋅]\s*(\w+)',
+            r'<div class="m-item-event[^>]*>[\s\S]*?<div[^>]*class="text-of"[^>]*>\s*(.*?)\s*</div>\s*(.*?)\s*[⋅]\s*(.*?)<',
             re.DOTALL
         )
         match = pattern.search(block)
         if match:
-            return match.group(1).strip(), f"{match.group(2).strip()} ⋅ {match.group(3).strip()}"
-        return None, None
+            event = match.group(1).strip()
+            stage = f"{match.group(2).strip()} ⋅ {match.group(3).strip()}"
+            return event, stage
+
+        # fallback: ลองหาเฉพาะ event name
+        fallback_event = re.search(r'<div class="m-item-event[^>]*>[\s\S]*?<div[^>]*class="text-of"[^>]*>\s*(.*?)\s*</div>', block)
+        return (fallback_event.group(1).strip() if fallback_event else "Unknown Event"), "Unknown Stage"
 
     def clean_logo(src):
         if not src:
