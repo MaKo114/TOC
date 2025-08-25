@@ -14,7 +14,9 @@ const PlayerDetail = () => {
     const fetchPlayer = async () => {
       try {
         const res = await axios.get(
-          `http://127.0.0.1:8000/team/player-info/?team=${team}&name=${name}`
+          `${
+            import.meta.env.VITE_BASE_URL
+          }/team/player-info/?team=${team}&name=${name}`
         );
         setPlayerDetail(res.data);
       } catch (err) {
@@ -27,6 +29,7 @@ const PlayerDetail = () => {
   
 
   return (
+
     <div>
 {(playerDetail?(<div className="px-10 py-6">
       <div className="bg-[#E7E6E3] rounded-lg shadow-md hover:shadow-lg transition-all duration-300 p-4 w-full">
@@ -80,6 +83,7 @@ const PlayerDetail = () => {
                 ></Flag>
                 {playerDetail.detail.country?.name || "Unknown"}
               </div>
+
             </div>
           </div>
         ) : (
@@ -202,6 +206,38 @@ const PlayerDetail = () => {
         )
         }
       </div>
+      <h2 className="text-2xl font-bold mb-4">Current Team</h2>
+      {playerDetail?.recent_team?.current_team ? (
+        <a
+          href={playerDetail.recent_team.current_team.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition block mb-6"
+        >
+          <div className="flex items-center gap-4">
+            <img
+              src={playerDetail.recent_team.current_team.logo}
+              alt={playerDetail.recent_team.current_team.name}
+              className="h-16 w-16 object-contain"
+            />
+            <div>
+              <p className="text-lg font-semibold text-white">
+                {playerDetail.recent_team.current_team.name}
+                {playerDetail.recent_team.current_team.role
+                  ? ` (${playerDetail.recent_team.current_team.role})`
+                  : ""}
+              </p>
+              <p className="text-gray-400">
+                {playerDetail.recent_team.current_team.joined
+                  ? `Joined: ${playerDetail.recent_team.current_team.joined}`
+                  : "No join date"}
+              </p>
+            </div>
+          </div>
+        </a>
+      ) : (
+        <p className="text-gray-400 mb-6">No current team info</p>
+      )}
 
       {/* ################################################################################################3 */}
 

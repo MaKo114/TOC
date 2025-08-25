@@ -5,7 +5,7 @@ import requests
 _cache = {}  # dict เอาไว้ cache
 
 def get_europe_team_info(base_url='https://www.vlr.gg'):
-    if "teams" in _cache:  # ถ้ามี cache แล้ว ใช้เลย
+    if "teams" in _cache:
         return _cache["teams"]
 
     html = requests.get(base_url).text
@@ -18,34 +18,53 @@ def get_europe_team_info(base_url='https://www.vlr.gg'):
     league_pattern = r'<a href="(/rankings/[a-z\-]+)"'
     league_paths = list(set(re.findall(league_pattern, html_main, re.IGNORECASE)))
     europe_leagues = [path for path in league_paths if any(k in path.lower() for k in ['europe', 'emea', 'eu'])]
-  
-    team_pattern = r'<a href="(/team/\d+/[^"]+)"[^>]*>[\s\S]*?<img[^>]+src="([^"]+)"[^>]*>[\s\S]*?<div[^>]*class="ge-text">([\s\S]*?)</div>'
+
+    team_pattern = r'<a href="(/team/\d+/[^"]+)"[^>]*>[\s\S]*?<img[^>]+src="([^"]+)"[^>]*>[\s\S]*?<div class="ge-text">([\s\S]*?<div class="rank-item-team-country">.*?</div>)[\s\S]*?</div>'
+    rank_pattern = r'<div class="rank-item-rank-num">\s*(\d+)\s*</div>'
+    rating_pattern = r'<div[^>]*class="rank-item-rating"[^>]*>\s*([\d]+)'
     team_data = []
 
     for path in europe_leagues:
         url = base_url + path
         html = requests.get(url).text
         teams = re.findall(team_pattern, html, re.DOTALL | re.IGNORECASE)
-        for href, logo_src, name in teams:
-            clean_name = re.sub(r'<[^>]+>', '', name)
+        ranks = re.findall(rank_pattern, html, re.IGNORECASE)
+        ratings = re.findall(rating_pattern, html, re.IGNORECASE)
+
+        for i, (href, logo_src, name_block) in enumerate(teams):
+            # ดึง country จาก block ของแต่ละทีม
+            country_match = re.search(r'<div[^>]*class="rank-item-team-country"[^>]*>\s*(.*?)\s*</div>', name_block, re.IGNORECASE)
+            country = country_match.group(1).strip() if country_match else "Unknown"
+
+            # ดึง tag
+            tag_match = re.search(r'<span[^>]*class="ge-text-light"[^>]*>\s*(#[A-Z0-9]+)\s*</span>', name_block)
+            team_tag = tag_match.group(1).strip() if tag_match else None
+
+            # ทำความสะอาดชื่อทีม
+            clean_name = re.sub(r'<[^>]+>', '', name_block)
             clean_name = re.sub(r'\s+', ' ', clean_name).strip()
-
-            # ลบ hash tag เช่น #B1M6
             clean_name = re.sub(r'#\w+', '', clean_name)
-
-            # ลบชื่อประเทศที่อาจติดมา
             clean_name = re.sub(r'\b[A-Z][a-z]+(?: [A-Z][a-z]+)*$', '', clean_name).strip()
+
+            # แก้ logo
             if logo_src == '/img/vlr/tmp/vlr.png':
                 logo_src = '//www.vlr.gg' + logo_src
-            
+
+            rank = int(ranks[i]) if i < len(ranks) else None
+            rating = int(ratings[i]) if i < len(ratings) else None
+
             team_data.append({
                 "name": clean_name,
+                "tag": team_tag,
                 "url": base_url + href,
-                "logo": 'https:' +logo_src,
-                "league": path
+                "logo": 'https:' + logo_src,
+                "league": path,
+                "ranks": rank,
+                "ratings": rating,
+                "country": country,
             })
 
-    _cache["teams"] = team_data  # เก็บใน cache
+    _cache["teams"] = team_data
     return team_data
 
 # def get_team_players(team):
@@ -143,7 +162,7 @@ def player_detail(team, name):
 
                 img_match = re.search(
                     r'<div[^>]*class="wf-avatar mod-player"[^>]*>[\s\S]*?<img[^>]+src="([^"]+)"', html.text)
-                img_url = 'https:' + img_match.group(1) if img_match else None
+                img_url = 'https:' + img_match.group(1) if img_match else 'https://vlr.gg/img/base/ph/sil.png'
 
                 result =  {
                     "alias": alias,
@@ -174,14 +193,20 @@ def extract_match_cards(team, name, limit=5):
     cards = re.findall(r'<a href="(/[^"]+)"[^>]*class="[^"]*wf-card[^"]*"[^>]*>([\s\S]*?)</a>', html_text)
 
     def extract_event_stage(block):
+        # ปรับ pattern ให้ยืดหยุ่นขึ้น
         pattern = re.compile(
-            r'<div class="m-item-event[^>]*>[\s\S]*?<div[^>]*class="text-of"[^>]*>\s*(.*?)\s*</div>\s*([\w\s]+)\s*[⋅]\s*(\w+)',
+            r'<div class="m-item-event[^>]*>[\s\S]*?<div[^>]*class="text-of"[^>]*>\s*(.*?)\s*</div>\s*(.*?)\s*[⋅]\s*(.*?)<',
             re.DOTALL
         )
         match = pattern.search(block)
         if match:
-            return match.group(1).strip(), f"{match.group(2).strip()} ⋅ {match.group(3).strip()}"
-        return None, None
+            event = match.group(1).strip()
+            stage = f"{match.group(2).strip()} ⋅ {match.group(3).strip()}"
+            return event, stage
+
+        # fallback: ลองหาเฉพาะ event name
+        fallback_event = re.search(r'<div class="m-item-event[^>]*>[\s\S]*?<div[^>]*class="text-of"[^>]*>\s*(.*?)\s*</div>', block)
+        return (fallback_event.group(1).strip() if fallback_event else "Unknown Event"), "Unknown Stage"
 
     def clean_logo(src):
         if not src:
@@ -371,5 +396,4 @@ def export_team_names_to_csv(filename="team_names.csv"):
 # input = input('search... : ')
 # team = [ e for e in teams if input.lower() in e['name'].lower()]
 
-# for i in team:
-#     print(i)
+# print(teams)

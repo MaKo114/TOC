@@ -6,7 +6,7 @@ import axios from "axios";
 function Nav({ searchTerm, setSearchTerm }) {
 
   const csvButton = async () => {
-    const res = await axios.get(`https://toc-backend-78wq.onrender.com/download/team-names`, {
+    const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/download/team-names`, {
       responseType: "blob",
     });
 

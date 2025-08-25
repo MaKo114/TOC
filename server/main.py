@@ -14,7 +14,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
+@app.get('/')
+def root():
+    return 'welcome toc project'
 
 @app.get("/teams")
 def fetch_all_data(query: str = None):
