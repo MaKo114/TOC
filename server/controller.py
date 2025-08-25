@@ -160,9 +160,21 @@ def player_detail(team, name):
                 code_match = re.search(r'<i[^>]*class="flag mod-([a-z]{2})"', html.text)
                 country_code = code_match.group(1).upper() if code_match else None
 
+                def clean_img(src):
+                    if not src:
+                        return 'https://vlr.gg/img/base/ph/sil.png'
+                    src = src.strip()
+                    if src.startswith('//'):
+                        return 'https:' + src
+                    if src.startswith('/'):
+                        return 'https://vlr.gg' + src
+                    if src.startswith('http'):
+                        return src
+                    return 'https://vlr.gg/' + src
+                
                 img_match = re.search(
                     r'<div[^>]*class="wf-avatar mod-player"[^>]*>[\s\S]*?<img[^>]+src="([^"]+)"', html.text)
-                img_url = 'https:' + img_match.group(1) if img_match else 'https://vlr.gg/img/base/ph/sil.png'
+                img_url = clean_img(img_match.group(1)) if img_match else 'https://vlr.gg/img/base/ph/sil.png'
 
                 result =  {
                     "alias": alias,
