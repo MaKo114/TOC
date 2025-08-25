@@ -29,7 +29,9 @@ function Content({ searchTerm }) {
   };
   const handlefetch = async (initialTeam) => {
     try {
-      const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/teams`);
+      const res = await axios.get(
+        `${import.meta.env.VITE_BASE_URL}/teams`
+      );
       const teams = Array.isArray(res.data) ? res.data : [];
       setAllTeams(teams);
       setFilteredTeams(teams); // เริ่มต้นแสดงทั้งหมด
@@ -71,14 +73,14 @@ function Content({ searchTerm }) {
         style={{ boxShadow: "0 0 8px rgba(255, 255, 255, 0.4)" }}
       >
         <div
-          className="text-white text-2xl md:text-3xl font-bold px-4 py-2 mt-5 mb-5 inline-block"
+          className="text-white text-3xl font-bold px-4 py-2 mt-5 mb-5 inline-block"
           style={{
             background: "linear-gradient(135deg, #ff0000, #b30000)",
             clipPath: "polygon(0 0, 100% 10%, 90% 100%, 0% 90%)",
             boxShadow: "0 0 10px rgba(255, 0, 0, 0.6)",
           }}
         >
-          Teams
+          Valorant Team Rankings
         </div>
 
         <div className="flex flex-col gap-3 px-4 pb-5 text-black text-lg md:text-xl">
@@ -96,18 +98,12 @@ function Content({ searchTerm }) {
                       : "hover:bg-gray-100"
                   }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <img
-                      className="h-12 w-12 object-contain md:h-16 md:w-16"
-                      src={item.logo}
-                      alt={item.name}
-                    />
-                    <div className="truncate">{item.name}</div>
-                  </div>
-                  <div className="flex flex-col mr-2">
-                    <div>#{item.ranks}</div>
-                    <span>{item.ratings}</span>
-                  </div>
+                  <img
+                    className="h-20 w-20 object-contain"
+                    src={item.logo}
+                    alt={item.name}
+                  />
+                  <div>{item.name}</div>
                 </button>
               );
             })}
