@@ -41,7 +41,7 @@ function Content({ searchTerm }) {
       if (teamToLoad) {
         setSelectedTeam(teamToLoad);
         const teamRes = await axios.get(
-          `${import.meta.env.VITE_BASE_URL}/players/${teamToLoad}`
+          `${import.meta.env.VITE_BASE_URL}/team/players/${teamToLoad}`
         );
         setTeam(teamRes.data);
       }

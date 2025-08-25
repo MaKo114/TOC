@@ -11,7 +11,7 @@ const PlayerDetail = () => {
     const fetchPlayer = async () => {
       try {
         const res = await axios.get(
-          `${import.meta.env.VITE_BASE_URL}/player-info/?team=${team}&name=${name}`
+          `${import.meta.env.VITE_BASE_URL}/team/player-info/?team=${team}&name=${name}`
         );
         setPlayerDetail(res.data);
       } catch (err) {
@@ -44,9 +44,9 @@ const PlayerDetail = () => {
             <div className="text-gray-600">
               {playerDetail.detail.social?.length ? (
                 playerDetail.detail.social.map((link, i) => (
-                  <div>
+                  <div key={i}>
                     <a
-                      key={i}
+                      
                       href={link}
                       target="_blank"
                       rel="noopener noreferrer"
