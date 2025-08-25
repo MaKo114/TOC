@@ -143,7 +143,7 @@ def player_detail(team, name):
 
                 img_match = re.search(
                     r'<div[^>]*class="wf-avatar mod-player"[^>]*>[\s\S]*?<img[^>]+src="([^"]+)"', html.text)
-                img_url = 'https:' + img_match.group(1) if img_match else None
+                img_url = 'https:' + img_match.group(1) if img_match else 'https://vlr.gg/img/base/ph/sil.png'
 
                 result =  {
                     "alias": alias,
