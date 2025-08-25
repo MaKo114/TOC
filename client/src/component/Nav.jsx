@@ -90,7 +90,7 @@ function Nav({ searchTerm, setSearchTerm }) {
                 window.open("https://www.vlr.gg/", "_blank")
               }
             >
-              Website refference
+              Website reference
             </button>
           </div>
         </div>

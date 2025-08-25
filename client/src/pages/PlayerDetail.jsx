@@ -50,9 +50,9 @@ const PlayerDetail = () => {
                 />
 
                 <div className="text-center sm:text-left">
-                  <p className="text-lg sm:text-2xl font-semibold text-gray-700">
-                    {playerDetail.detail.alias || "ไม่ระบุ"} (
-                    {playerDetail.detail.real_name || "ไม่ระบุ"})
+                  <p className="text-lg sm:text-2xl font-semibold text-gray-700 flex justify-between items-end gap-3">
+                    {playerDetail.detail.alias || "ไม่ระบุ"}
+                    <div className="text-xl text-gray-600">{playerDetail.detail.real_name || "ไม่ระบุ"}</div>
                   </p>
 
                   <div className="mt-2 text-gray-600">
