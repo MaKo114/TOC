@@ -6,7 +6,7 @@ import axios from "axios";
 function Nav({ searchTerm, setSearchTerm }) {
   const csvButton = async () => {
     const res = await axios.get(
-      `${import.meta.env.VITE_BASE_URL}/download/team-names`,
+      `${import.meta.env.VITE_BASE_URL}/download/team-info`,
       {
         responseType: "blob",
       }
@@ -61,7 +61,7 @@ function Nav({ searchTerm, setSearchTerm }) {
           </div>
 
           {/* Buttons */}
-          <div className="flex flex-col md:flex-row gap-3 w-full">
+          <div className="flex flex-col md:flex-row md:justify-center gap-3 w-full">
             <button
               className="flex items-center justify-center gap-2 px-4 py-2 text-white 
         bg-black/40 border border-cyan-400 rounded-lg 

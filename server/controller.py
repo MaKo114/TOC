@@ -393,14 +393,28 @@ def extract_all_team_info(team, name):
     _cache[cache_key] = result
     return result
         
-def export_team_names_to_csv(filename="team_names.csv"):
-    team_names = get_europe_team_info()
+
+def export_team_info_to_csv(filename="team_info.csv"):
+    teams = get_europe_team_info()  # ต้อง return เป็น list ของ dict แบบที่คุณให้มา
+
     with open(filename, mode="w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
-        writer.writerow(["Team Name"])
-        for name in team_names:
-            writer.writerow([name])
-    print(f"บันทึกชื่อทีมทั้งหมดลงไฟล์ {filename} แล้ว")
+
+        # เขียน header
+        writer.writerow(["Name", "Tag", "Logo", "Ranks", "Ratings", "Country"])
+
+        # เขียนข้อมูลแต่ละทีม
+        for team in teams:
+            writer.writerow([
+                team.get("name", ""),
+                team.get("tag", ""),
+                team.get("logo", ""),
+                team.get("ranks", ""),
+                team.get("ratings", ""),
+                team.get("country", "")
+            ])
+
+    print(f"บันทึกข้อมูลทีมทั้งหมดลงไฟล์ {filename} แล้ว")
 
 
 # teams = get_europe_team_info()

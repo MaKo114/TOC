@@ -31,7 +31,7 @@ const PlayerDetail = () => {
           {/* Player Profile */}
           <div className="bg-[#E7E6E3] rounded-lg shadow-md p-4 w-full mb-6">
             <div
-              className="text-xl sm:text-2xl font-bold px-4 py-2 text-white inline-block mb-4"
+              className="text-xl px-4 py-2 text-white font-bold inline-block mb-4"
               style={{
                 background: "linear-gradient(135deg, #ff0000, #b30000)",
                 clipPath: "polygon(0 0, 100% 10%, 90% 100%, 0% 90%)",
@@ -42,17 +42,19 @@ const PlayerDetail = () => {
             </div>
 
             {playerDetail?.detail ? (
-              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 bg-white p-10 rounded-lg">
                 <img
                   src={playerDetail.detail.image}
-                  className="h-40 w-40 object-cover rounded-xl border-2 border-white"
+                  className="h-40 w-40 object-cover rounded-xl border-2 border-gray-400 bg-[#E7E6E3]"
                   alt={playerDetail.detail.alias}
                 />
 
                 <div className="text-center sm:text-left">
                   <p className="text-lg sm:text-2xl font-semibold text-gray-700 flex justify-between items-end gap-3">
                     {playerDetail.detail.alias || "ไม่ระบุ"}
-                    <div className="text-xl text-gray-600">{playerDetail.detail.real_name || "ไม่ระบุ"}</div>
+                    <div className="text-xl text-gray-600">
+                      {playerDetail.detail.real_name || "ไม่ระบุ"}
+                    </div>
                   </p>
 
                   <div className="mt-2 text-gray-600">
@@ -95,7 +97,7 @@ const PlayerDetail = () => {
           {/* Recent Matches */}
           <div className="bg-[#E7E6E3] rounded-lg shadow-md p-4 w-full mb-6">
             <div
-              className="text-xl sm:text-2xl font-bold px-4 py-2 text-white inline-block mb-4"
+              className="text-xl px-4 py-2 text-white font-bold inline-block mb-4"
               style={{
                 background: "linear-gradient(135deg, #ff0000, #b30000)",
                 clipPath: "polygon(0 0, 100% 10%, 90% 100%, 0% 90%)",
@@ -109,7 +111,7 @@ const PlayerDetail = () => {
               playerDetail.matches.map((item, index) => (
                 <div
                   key={index}
-                  className="my-4 p-4 bg-white rounded-lg shadow-md flex flex-col sm:flex-row gap-4"
+                  className=" my-4 p-4 bg-white rounded-lg shadow-md flex flex-col justify-center items-center sm:flex-row gap-4"
                 >
                   {/* Thumbnail */}
                   <img
@@ -122,7 +124,7 @@ const PlayerDetail = () => {
                   />
 
                   {/* Match Info */}
-                  <div className="flex flex-col sm:grid sm:grid-cols-7 gap-3 sm:gap-4 w-full text-center sm:text-left">
+                  <div className="flex flex-col sm:grid sm:grid-cols-6 md:grid-cols-7 gap-3 sm:gap-4 w-full text-center sm:text-left">
                     <div className="col-span-2">
                       <p className="text-base font-bold text-black truncate">
                         {item.event}
@@ -130,20 +132,22 @@ const PlayerDetail = () => {
                       <p className="text-sm text-gray-500">{item.stage}</p>
                     </div>
 
-                    <div className="md:grid md:grid-cols-2 md:items-center md:text-end font-semibold text-black">
-                      {item.team_1}
-                      <img
-                        src={item.team_1_logo}
-                        alt={item.team_1}
-                        className="h-12 w-12 object-contain mx-auto"
-                      />
+                    <div className="sm:flex sm:flex-col-reverse md:grid md:grid-cols-2 md:items-center md:text-end font-semibold text-black">
+                      <div>{item.team_1}</div>
+                      
+                        <img
+                          src={item.team_1_logo}
+                          alt={item.team_1}
+                          className="h-12 w-12 object-contain mx-auto"
+                        />
+                      
                     </div>
 
                     {/* Score */}
                     <div className="flex justify-center items-center">
                       {item.score && (
                         <span
-                          className={`px-3 py-1 rounded-lg text-white text-sm font-bold ${
+                          className={`px-5 py-2  sm:px-1 md:px-2 lg:px-6 rounded-lg text-white text-sm font-bold ${
                             parseInt(item.score.split(":")[0]) >
                             parseInt(item.score.split(":")[1])
                               ? "bg-green-500"
@@ -167,6 +171,11 @@ const PlayerDetail = () => {
                       {item.team_2}
                     </div>
                   </div>
+
+                  <div className="flex flex-col justify-center items-center md:flex md:flex-col md:justify-center md:items-end">
+                    <div>{item.date}</div>
+                    <div>{item.time}</div>
+                  </div>
                 </div>
               ))
             ) : (
@@ -176,7 +185,14 @@ const PlayerDetail = () => {
 
           {/* Current Team */}
           <div className="bg-[#E7E6E3] rounded-lg shadow-md p-4 w-full mb-6">
-            <h3 className="text-xl sm:text-2xl font-bold mb-4 text-black">
+            <h3
+              className="text-xl font-bold px-4 py-1 inline-block mb-4 text-white"
+              style={{
+                background: "linear-gradient(135deg, #ff0000, #b30000)",
+                clipPath: "polygon(0 0, 100% 10%, 90% 100%, 0% 90%)",
+                boxShadow: "0 0 10px rgba(255, 0, 0, 0.6)",
+              }}
+            >
               Current Team
             </h3>
             {playerDetail?.recent_team?.current_team ? (
@@ -204,7 +220,14 @@ const PlayerDetail = () => {
 
           {/* Past Teams */}
           <div className="bg-[#E7E6E3] rounded-lg shadow-md p-4 w-full mb-6">
-            <h3 className="text-xl sm:text-2xl font-bold mb-4 text-black">
+            <h3
+              className="text-xl px-4 py-1 font-bold inline-block mb-4 text-white"
+              style={{
+                background: "linear-gradient(135deg, #ff0000, #b30000)",
+                clipPath: "polygon(0 0, 100% 10%, 90% 100%, 0% 90%)",
+                boxShadow: "0 0 10px rgba(255, 0, 0, 0.6)",
+              }}
+            >
               Past Teams
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

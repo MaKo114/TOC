@@ -54,12 +54,16 @@ def player_info(team: str, name: str):
     
     
     
-@app.get("/download/team-names")
-def download_team_names():
+@app.get("/download/team-info")
+def download_team_info():
     try:
-        filename = "team_names.csv"
-        export_team_names_to_csv(filename)
+        filename = "team_info.csv"
+        export_team_info_to_csv(filename)
         file_path = os.path.abspath(filename)
+
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"File {filename} not found.")
+
         return FileResponse(
             path=file_path,
             filename=filename,
@@ -67,4 +71,5 @@ def download_team_names():
         )
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
+
 
