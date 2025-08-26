@@ -201,7 +201,7 @@ function ProfileCard({ profile, team }) {
             {profile.roles.map((role, idx) => (
               <span
                 key={idx}
-                className="bg-indigo-100 text-indigo-700 text-[10px] px-2 py-1 rounded-full"
+                className="bg-gray-300 text-gray-600 text-[10px] px-2"
               >
                 {role}
               </span>

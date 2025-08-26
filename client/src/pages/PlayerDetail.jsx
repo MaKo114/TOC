@@ -50,12 +50,12 @@ const PlayerDetail = () => {
                 />
 
                 <div className="text-center sm:text-left">
-                  <p className="text-lg sm:text-2xl font-semibold text-gray-700 flex justify-between items-end gap-3">
-                    {playerDetail.detail.alias || "ไม่ระบุ"}
-                    <div className="text-xl text-gray-600">
-                      {playerDetail.detail.real_name || "ไม่ระบุ"}
+                  <div className="text-xl sm:text-2xl font-semibold text-gray-700 ">
+                   <div> {playerDetail.detail.alias}</div>
+                    <div className="text-sm text-gray-600">
+                      {playerDetail.detail.real_name}
                     </div>
-                  </p>
+                  </div>
 
                   <div className="mt-2 text-gray-600">
                     {playerDetail.detail.social?.length ? (
@@ -134,13 +134,12 @@ const PlayerDetail = () => {
 
                     <div className="sm:flex sm:flex-col-reverse md:grid md:grid-cols-2 md:items-center md:text-end font-semibold text-black">
                       <div>{item.team_1}</div>
-                      
-                        <img
-                          src={item.team_1_logo}
-                          alt={item.team_1}
-                          className="h-12 w-12 object-contain mx-auto"
-                        />
-                      
+
+                      <img
+                        src={item.team_1_logo}
+                        alt={item.team_1}
+                        className="h-12 w-12 object-contain mx-auto"
+                      />
                     </div>
 
                     {/* Score */}
@@ -179,7 +178,7 @@ const PlayerDetail = () => {
                 </div>
               ))
             ) : (
-              <p className="text-black text-center">No matches found.</p>
+              <p className="text-black text-center pb-4">No matches found.</p>
             )}
           </div>
 
@@ -203,13 +202,16 @@ const PlayerDetail = () => {
                   className="h-12 w-12 object-contain"
                 />
                 <div>
-                  <p className="font-semibold text-black">
+                  <p className="flex flex-col font-semibold text-black">
                     {playerDetail.recent_team.current_team.name}{" "}
-                    {playerDetail.recent_team.current_team.role &&
-                      `(${playerDetail.recent_team.current_team.role})`}
+                    {playerDetail.recent_team.current_team.role && (
+                      <p className="bg-gray-300 text-sm text-center px-1  text-gray-600 ">
+                        {playerDetail.recent_team.current_team.role.toUpperCase()}
+                      </p>
+                    )}
                   </p>
                   <p className="text-gray-500 text-sm">
-                    joined {playerDetail.recent_team.current_team.joined}
+                     {(playerDetail.recent_team.current_team.joined ? (<>joined in {playerDetail.recent_team.current_team.joined}</>):(<></>))}
                   </p>
                 </div>
               </div>
@@ -243,15 +245,18 @@ const PlayerDetail = () => {
                       className="h-12 w-12 object-contain"
                     />
                     <div>
-                      <p className="font-semibold text-black">
-                        {team.name} {team.role && `(${team.role})`}
-                      </p>
+                      <div className="flex flex-col items-start font-semibold text-black">
+                        <span>{team.name}</span>
+                        <span className="bg-gray-300 text-sm  px-1 text-center  text-gray-600">
+                          {team.role && team.role.toUpperCase()}
+                        </span>
+                      </div>
                       <p className="text-gray-500 text-sm">
                         {team.joined && team.left
                           ? `${team.joined} – ${team.left}`
                           : team.left
-                          ? `Left: ${team.left}`
-                          : "No date info"}
+                          ? `left in ${team.left}`
+                          : <></>}
                       </p>
                       {team.inactive && (
                         <p className="text-red-500 text-sm italic">
