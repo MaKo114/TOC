@@ -160,9 +160,21 @@ def player_detail(team, name):
                 code_match = re.search(r'<i[^>]*class="flag mod-([a-z]{2})"', html.text)
                 country_code = code_match.group(1).upper() if code_match else None
 
+                def clean_img(src):
+                    if not src:
+                        return 'https://vlr.gg/img/base/ph/sil.png'
+                    src = src.strip()
+                    if src.startswith('//'):
+                        return 'https:' + src
+                    if src.startswith('/'):
+                        return 'https://vlr.gg' + src
+                    if src.startswith('http'):
+                        return src
+                    return 'https://vlr.gg/' + src
+                
                 img_match = re.search(
                     r'<div[^>]*class="wf-avatar mod-player"[^>]*>[\s\S]*?<img[^>]+src="([^"]+)"', html.text)
-                img_url = 'https:' + img_match.group(1) if img_match else 'https://vlr.gg/img/base/ph/sil.png'
+                img_url = clean_img(img_match.group(1)) if img_match else 'https://vlr.gg/img/base/ph/sil.png'
 
                 result =  {
                     "alias": alias,
@@ -381,14 +393,28 @@ def extract_all_team_info(team, name):
     _cache[cache_key] = result
     return result
         
-def export_team_names_to_csv(filename="team_names.csv"):
-    team_names = get_europe_team_info()
+
+def export_team_info_to_csv(filename="team_info.csv"):
+    teams = get_europe_team_info()  # ต้อง return เป็น list ของ dict แบบที่คุณให้มา
+
     with open(filename, mode="w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
-        writer.writerow(["Team Name"])
-        for name in team_names:
-            writer.writerow([name])
-    print(f"บันทึกชื่อทีมทั้งหมดลงไฟล์ {filename} แล้ว")
+
+        # เขียน header
+        writer.writerow(["Name", "Tag", "Logo", "Ranks", "Ratings", "Country"])
+
+        # เขียนข้อมูลแต่ละทีม
+        for team in teams:
+            writer.writerow([
+                team.get("name", ""),
+                team.get("tag", ""),
+                team.get("logo", ""),
+                team.get("ranks", ""),
+                team.get("ratings", ""),
+                team.get("country", "")
+            ])
+
+    print(f"บันทึกข้อมูลทีมทั้งหมดลงไฟล์ {filename} แล้ว")
 
 
 # teams = get_europe_team_info()

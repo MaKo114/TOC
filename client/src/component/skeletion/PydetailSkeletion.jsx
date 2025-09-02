@@ -1,6 +1,6 @@
 import React from "react";
 
-const FullPageSkeleton = () => {
+const PydetailSkeletion = () => {
   return (
     <div className="space-y-8 px-6 py-10 bg-[#F5F5F5] min-h-screen animate-pulse">
 
@@ -49,4 +49,4 @@ const FullPageSkeleton = () => {
   );
 };
 
-export default FullPageSkeleton;
+export default PydetailSkeletion;
