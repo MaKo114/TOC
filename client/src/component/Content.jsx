@@ -77,7 +77,7 @@ function Content({ searchTerm }) {
         style={{ boxShadow: "0 0 8px rgba(255, 255, 255, 0.4)" }}
       >
         <div
-          className="text-white text-3xl font-bold px-4 py-2 mt-5 mb-5 pr-8 inline-block"
+          className="text-white text-3xl font-bold px-10 py-2 mt-5 mb-5 inline-block"
           style={{
             background: "linear-gradient(135deg, #ff0000, #b30000)",
             clipPath: "polygon(0 0, 100% 10%, 90% 100%, 0% 90%)",
@@ -108,13 +108,13 @@ function Content({ searchTerm }) {
                     alt={item.name}
                   />
                   <div>
-                    <div className="flex justify-center items-center gap-2">{item.name}  <div className="text-sm text-gray-500">#AFP</div></div> 
-                    <div className="text-start text-gray-600">Europe</div>
+                    <div className="flex justify-center items-center gap-2">{item.name}  <div className="text-sm text-gray-500">{item.tag}</div></div> 
+                    <div className="text-start text-gray-600">{item.country}</div>
                   </div>
 
                   <div className="ml-auto text-right mr-4">
-                    <div className="text-center">#{index + 1}</div>
-                    <div>2000</div>
+                    <div className="text-center">#{item.ranks}</div>
+                    <div>{item.ratings}</div>
                   </div>
                 </button>
               );
@@ -128,7 +128,7 @@ function Content({ searchTerm }) {
         style={{ boxShadow: "0 0 8px rgba(255, 255, 255, 0.4)" }}
       >
         <div
-          className="text-white text-3xl font-bold px-4 py-2 mt-5 mb-5 inline-block"
+          className="text-white text-3xl font-bold px-10 py-2 mt-5 mb-5 inline-block"
           style={{
             background: "linear-gradient(135deg, #ff0000, #b30000)",
             clipPath: "polygon(0 0, 100% 10%, 90% 100%, 0% 90%)",
@@ -178,7 +178,7 @@ function Content({ searchTerm }) {
         </div>
 
         <div
-          className="text-white text-3xl font-bold px-4 py-2 mt-5 mb-5 inline-block"
+          className="text-white text-3xl font-bold px-10 py-2 mt-5 mb-5 inline-block"
           style={{
             background: "linear-gradient(135deg, #ff0000, #b30000)",
             clipPath: "polygon(0 0, 100% 10%, 90% 100%, 0% 90%)",

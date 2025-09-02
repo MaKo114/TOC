@@ -34,7 +34,7 @@ const PlayerDetail = () => {
 {(playerDetail?(<div className="px-10 py-6">
       <div className="bg-[#E7E6E3] rounded-lg shadow-md hover:shadow-lg transition-all duration-300 p-4 w-full">
         <div
-          className="text-2xl font-bold px-4 py-2 text-white inline-block"
+          className="text-2xl font-bold px-10 py-2 text-white inline-block"
           style={{
             background: "linear-gradient(135deg, #ff0000, #b30000)",
             clipPath: "polygon(0 0, 100% 10%, 90% 100%, 0% 90%)",
@@ -94,7 +94,7 @@ const PlayerDetail = () => {
       {/* ######################################################################## */}
       <div className="bg-[#E7E6E3] rounded-lg shadow-md w-full h-auto mt-5 pb-8 py-6 px-4">
         <div
-          className="text-2xl font-bold px-4 py-2 text-white inline-block"
+          className="text-2xl font-bold px-10 py-2 text-white inline-block"
           style={{
             background: "linear-gradient(135deg, #ff0000, #b30000)",
             clipPath: "polygon(0 0, 100% 10%, 90% 100%, 0% 90%)",
@@ -108,7 +108,7 @@ const PlayerDetail = () => {
           playerDetail.matches.map((item, index) => (
             <div
               key={index}
-              className="my-4 mx-auto max-w-5xl p-4  bg-gray-500 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex flex-col sm:flex-row items-center gap-4"
+              className="my-4 mx-auto max-w-5xl p-4  bg-[#d2d1cc] rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex flex-col sm:flex-row items-center gap-4"
             >
               {/* Event Thumbnail */}
               <img
@@ -206,44 +206,13 @@ const PlayerDetail = () => {
         )
         }
       </div>
-      <h2 className="text-2xl font-bold mb-4">Current Team</h2>
-      {playerDetail?.recent_team?.current_team ? (
-        <a
-          href={playerDetail.recent_team.current_team.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition block mb-6"
-        >
-          <div className="flex items-center gap-4">
-            <img
-              src={playerDetail.recent_team.current_team.logo}
-              alt={playerDetail.recent_team.current_team.name}
-              className="h-16 w-16 object-contain"
-            />
-            <div>
-              <p className="text-lg font-semibold text-white">
-                {playerDetail.recent_team.current_team.name}
-                {playerDetail.recent_team.current_team.role
-                  ? ` (${playerDetail.recent_team.current_team.role})`
-                  : ""}
-              </p>
-              <p className="text-gray-400">
-                {playerDetail.recent_team.current_team.joined
-                  ? `Joined: ${playerDetail.recent_team.current_team.joined}`
-                  : "No join date"}
-              </p>
-            </div>
-          </div>
-        </a>
-      ) : (
-        <p className="text-gray-400 mb-6">No current team info</p>
-      )}
+      
 
       {/* ################################################################################################3 */}
 
       <div className="bg-[#E7E6E3] rounded-lg shadow-md w-full h-auto mt-5 pb-8 py-6 px-4">
         <div
-          className="text-2xl font-bold px-4 py-2 text-white inline-block"
+          className="text-2xl font-bold px-10 py-2 text-white inline-block"
           style={{
             background: "linear-gradient(135deg, #ff0000, #b30000)",
             clipPath: "polygon(0 0, 100% 10%, 90% 100%, 0% 90%)",
@@ -253,7 +222,7 @@ const PlayerDetail = () => {
           Current Teams
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mx-10 mt-5">
-          <div className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition">
+          <div className="p-4 bg-[#d2d1cc] rounded-lg shadow-md hover:shadow-lg transition">
             {playerDetail?.recent_team?.current_team ? (
               <div className="flex items-center gap-4">
                 <img
@@ -284,7 +253,7 @@ const PlayerDetail = () => {
 
       <div className="bg-[#E7E6E3] rounded-lg shadow-md w-full h-auto mt-5 pb-8 py-6 px-4">
         <div
-          className="text-2xl font-bold px-4 py-2 text-white inline-block"
+          className="text-2xl font-bold px-10 py-2  text-white inline-block"
           style={{
             background: "linear-gradient(135deg, #ff0000, #b30000)",
             clipPath: "polygon(0 0, 100% 10%, 90% 100%, 0% 90%)",
@@ -297,7 +266,7 @@ const PlayerDetail = () => {
           {playerDetail?.recent_team?.past_teams?.map((team, index) => (
             <div
               key={index}
-              className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition"
+              className="p-4 bg-[#d2d1cc] rounded-lg shadow-md hover:shadow-lg transition"
             >
               <div className="flex items-center gap-4">
                 <img
