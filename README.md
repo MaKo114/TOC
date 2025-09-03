@@ -33,7 +33,7 @@ front-end
 2. C:\Users\Path\Documents\GitHub\TOC\client
 3. npm start
 
-*** ต้องสร้างไฟล์ .env ใน C:\Users\Path\Documents\GitHub\TOC\client ด้วย visual studio code หรือใน notepad โดยนามสกุลไฟล์ห้ามเป็น .txt
-VITE_BASE_URL=https://toc-backend-78wq.onrender.com
-# VITE_BASE_URL=http://127.0.0.1:8000
+*** ต้องสร้างไฟล์ .env ใน C:\Users\Path\Documents\GitHub\TOC\client ด้วย visual studio code หรือใน notepad โดยนามสกุลไฟล์ห้ามเป็น .txt เลือกได้ 2 แบบ
+1. VITE_BASE_URL=https://toc-backend-78wq.onrender.com
+2. VITE_BASE_URL=http://127.0.0.1:8000
 
