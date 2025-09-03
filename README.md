@@ -18,8 +18,7 @@ back-end
 1. เข้า C:\Users\Path\Documents\GitHub\TOC
 2. myenv\Scripts\activate
 3. เข้า C:\Users\Path\Documents\GitHub\TOC\server
-4. uvicorn main:app --reload
-
+4. uvicorn main:app --reload หรือ python -m uvicorn main:app --reload
 ---------------------------------------------------------------------------
 front-end
 
