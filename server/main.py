@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Response
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 import os
@@ -14,9 +14,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get('/')
-def root():
-    return 'welcome toc project'
+@app.api_route("/", methods=["GET", "HEAD"])
+async def root(request: Request):
+    return {"message": "welcome toc project"}
+
 
 @app.get("/teams")
 def fetch_all_data(query: str = None):
