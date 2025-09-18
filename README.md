@@ -16,24 +16,25 @@ back-end
 
 มี Project อยู่แล้ว
 1. เข้าไปที่ folder ที่ clone โปรเจคลงมา
-2. .venv\Scripts\activate หรือ .venv\Scripts\activate
-3. เข้า C:\Users\Path\Documents\GitHub\TOC\server
+3. cd ไปที่ path server
+2. ใช้คำสั่ง: myenv\Scripts\activate หรือ .venv\Scripts\activate
 4. uvicorn main:app --reload หรือ python -m uvicorn main:app --reload
 ---------------------------------------------------------------------------
 front-end
 
 ติดตั้งครั้งแรก วิธี RUN front-end
-1. เข้า C:\Users\Path\Documents\GitHub\TOC\client
-2. npm install
-3. C:\Users\Path\Documents\GitHub\Theory-Of-Computation\client
+1. เข้าไปที่ folder ที่ clone โปรเจคลงมา
+2. cd ไปที่ path client
+3. npm install
 4. npm start
 
 มี Project อยู่แล้ว
-1. เข้า C:\Users\Path\Documents\GitHub\TOC\client
-2. C:\Users\Path\Documents\GitHub\TOC\client
+1. เข้าไปที่ folder ที่ clone โปรเจคลงมา
+2. cd ไปที่ path client
 3. npm start
 
 *** ต้องสร้างไฟล์ .env ใน C:\Users\Path\Documents\GitHub\TOC\client ด้วย visual studio code หรือใน notepad โดยนามสกุลไฟล์ห้ามเป็น .txt เลือกได้ 2 แบบ
 1. VITE_BASE_URL=https://toc-backend-78wq.onrender.com
 2. VITE_BASE_URL=http://127.0.0.1:8000
+3. หรือจะเอาไปทั้งคู่ เวลาจะใช้งานให้ comment สักอัน
 
