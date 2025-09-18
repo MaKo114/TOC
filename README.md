@@ -7,16 +7,16 @@ web crawler
 back-end
 
 ติดตั้งครั้งแรก วิธี RUN back-end
-1. เข้า C:\Users\Path\Documents\GitHub\TOC
-2. python -m venv myenv
-3. myenv\Scripts\activate  // for me => .venv\Scripts\activate.bat
-4. เข้า C:\Users\Path\Documents\GitHub\TOC\server
-5. pip install fastapi uvicorn
+1. เข้าไปที่ folder ที่ clone โปรเจคลงมา
+2. cd ไปที่ path server
+3. ติดตั้ง venv: python -m venv myenv
+4. ใส่ command เพื่อเปิด myenv: myenv\Scripts\activate  // for me => .venv\Scripts\activate
+5. ติดตั้ง lib ที่ใช้ในโปรเจคลง venv: pip install -r requirements.txt
 6. uvicorn main:app --reload หรือ python -m uvicorn main:app --reload
 
 มี Project อยู่แล้ว
-1. เข้า C:\Users\Path\Documents\GitHub\TOC
-2. myenv\Scripts\activate
+1. เข้าไปที่ folder ที่ clone โปรเจคลงมา
+2. .venv\Scripts\activate หรือ .venv\Scripts\activate
 3. เข้า C:\Users\Path\Documents\GitHub\TOC\server
 4. uvicorn main:app --reload หรือ python -m uvicorn main:app --reload
 ---------------------------------------------------------------------------
