@@ -103,6 +103,7 @@ function Content({ searchTerm }) {
                   >
                     <div className="flex items-center gap-2">
                       <img
+                        referrerPolicy="no-referrer"
                         className="h-12 w-12 object-contain"
                         src={item.logo}
                         alt={item.name}
@@ -186,6 +187,7 @@ function ProfileCard({ profile, team }) {
       className="flex items-center  bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 p-4"
     >
       <img
+        referrerPolicy="no-referrer"
         src={profile.image}
         className="h-16 w-16 object-cover rounded-full border-2 border-white"
         alt={profile.alias}
