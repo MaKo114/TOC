@@ -208,7 +208,10 @@ def extract_match_cards(team, name, limit=5):
     html = requests.get(player['href'])
     html_text = html.text.replace("&sdot;", "⋅")
 
-    cards = re.findall(r'<a href="(/[^"]+)"[^>]*class="[^"]*wf-card[^"]*"[^>]*>([\s\S]*?)</a>', html_text)
+    anchors = re.findall(r'<a href="(/[^"]+)"[^>]*class="([^"]*)"[^>]*>([\s\S]*?)</a>', html_text)
+    # Map-stat cards also use wf-card; only the exact m-item class is a match.
+    cards = [(url, block) for url, classes, block in anchors
+             if {'wf-card', 'm-item'}.issubset(classes.split())]
 
     def extract_event_stage(block):
         # ปรับ pattern ให้ยืดหยุ่นขึ้น
