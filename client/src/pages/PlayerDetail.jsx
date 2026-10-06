@@ -3,6 +3,7 @@ import Flag from "react-world-flags";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import PydetailSkeletion from "../component/skeletion/PydetailSkeletion";
+import { imageReferrerPolicy } from "../utils/imageReferrerPolicy";
 
 const PlayerDetail = () => {
   const { team, name } = useParams();
@@ -44,7 +45,7 @@ const PlayerDetail = () => {
             {playerDetail?.detail ? (
               <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 bg-white p-10 rounded-lg">
                 <img
-                  referrerPolicy="no-referrer"
+                  referrerPolicy={imageReferrerPolicy(playerDetail.detail.image)}
                   src={playerDetail.detail.image}
                   className="h-40 w-40 object-cover rounded-xl border-2 border-gray-400 bg-[#E7E6E3]"
                   alt={playerDetail.detail.alias}
@@ -116,7 +117,9 @@ const PlayerDetail = () => {
                 >
                   {/* Thumbnail */}
                   <img
-                    referrerPolicy="no-referrer"
+                    referrerPolicy={imageReferrerPolicy(
+                      item.event_thumb || "https://www.vlr.gg/img/vlr/tmp/vlr.png"
+                    )}
                     src={
                       item.event_thumb ||
                       "https://www.vlr.gg/img/vlr/tmp/vlr.png"
@@ -138,7 +141,7 @@ const PlayerDetail = () => {
                       <div>{item.team_1}</div>
 
                       <img
-                        referrerPolicy="no-referrer"
+                        referrerPolicy={imageReferrerPolicy(item.team_1_logo)}
                         src={item.team_1_logo}
                         alt={item.team_1}
                         className="h-12 w-12 object-contain mx-auto"
@@ -166,7 +169,7 @@ const PlayerDetail = () => {
 
                     <div className="md:grid md:grid-cols-2 md:items-center font-semibold text-black">
                       <img
-                        referrerPolicy="no-referrer"
+                        referrerPolicy={imageReferrerPolicy(item.team_2_logo)}
                         src={item.team_2_logo}
                         alt={item.team_2}
                         className="h-12 w-12 object-contain mx-auto"
@@ -201,7 +204,7 @@ const PlayerDetail = () => {
             {playerDetail?.recent_team?.current_team ? (
               <div className="flex items-center gap-4 bg-white p-4 rounded-lg shadow-md">
                 <img
-                  referrerPolicy="no-referrer"
+                  referrerPolicy={imageReferrerPolicy(playerDetail.recent_team.current_team.logo)}
                   src={playerDetail.recent_team.current_team.logo}
                   alt={playerDetail.recent_team.current_team.name}
                   className="h-12 w-12 object-contain"
@@ -245,7 +248,7 @@ const PlayerDetail = () => {
                     className="flex items-center gap-4 bg-white p-4 rounded-lg shadow-md"
                   >
                     <img
-                      referrerPolicy="no-referrer"
+                      referrerPolicy={imageReferrerPolicy(team.logo)}
                       src={team.logo}
                       alt={team.name}
                       className="h-12 w-12 object-contain"

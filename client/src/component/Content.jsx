@@ -4,6 +4,7 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import Skeleton from "./skeletion/Skeleton";
 import TeamSkeleton from "./skeletion/TeamSkeleton";
+import { imageReferrerPolicy } from "../utils/imageReferrerPolicy";
 
 function Content({ searchTerm }) {
   const [allTeams, setAllTeams] = useState([]);
@@ -103,7 +104,7 @@ function Content({ searchTerm }) {
                   >
                     <div className="flex items-center gap-2">
                       <img
-                        referrerPolicy="no-referrer"
+                        referrerPolicy={imageReferrerPolicy(item.logo)}
                         className="h-12 w-12 object-contain"
                         src={item.logo}
                         alt={item.name}
@@ -187,7 +188,7 @@ function ProfileCard({ profile, team }) {
       className="flex items-center  bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 p-4"
     >
       <img
-        referrerPolicy="no-referrer"
+        referrerPolicy={imageReferrerPolicy(profile.image)}
         src={profile.image}
         className="h-16 w-16 object-cover rounded-full border-2 border-white"
         alt={profile.alias}

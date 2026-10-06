@@ -1,11 +1,16 @@
 import re
 import csv
 import requests
+import time
 
 _cache = {}  # dict เอาไว้ cache
 
+_teams_cached_at = 0.0
+TEAMS_CACHE_TTL_SECONDS = 5 * 60
+
 def get_europe_team_info(base_url='https://www.vlr.gg'):
-    if "teams" in _cache:
+    global _teams_cached_at
+    if "teams" in _cache and time.monotonic() - _teams_cached_at < TEAMS_CACHE_TTL_SECONDS:
         return _cache["teams"]
 
     html = requests.get(base_url).text
@@ -65,6 +70,7 @@ def get_europe_team_info(base_url='https://www.vlr.gg'):
             })
 
     _cache["teams"] = team_data
+    _teams_cached_at = time.monotonic()
     return team_data
 
 # def get_team_players(team):
